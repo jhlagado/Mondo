@@ -5,5 +5,5 @@
 
     jp   start
 
-.include "MONDO.asm"
+.include "MAIN.asm"
 .include "ram.asm"
