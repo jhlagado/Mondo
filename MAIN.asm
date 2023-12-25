@@ -107,20 +107,18 @@ iOpcodes:
 
 iAltCodes:
 
-    LITDAT 4
-    db     lsb(cStore_)      ;!  byte store     
-    db     lsb(aNop_)       ;"  				
-    db     lsb(aNop_)       ;#  edit definition 				
-    db     lsb(newln_)      ;$  prints a newline to output	
-
-    REPDAT 21, lsb(aNop_)
-                            ; %
-                            ; &
-                            ; '
-                            ; (
-                            ; )
-                            ; *
-                            ; +
+    REPDAT 32, lsb(aNop_)
+                            ;!       
+                            ;"  				
+                            ;#   				
+                            ;$  	
+                            ;%
+                            ;&
+                            ;'
+                            ;(
+                            ;)
+                            ;*
+                            ;+
                             ;,                
                             ;-  
                             ;.              
@@ -135,21 +133,17 @@ iAltCodes:
                             ;7
                             ;8
                             ;9
-                            
-    LITDAT 1
-    db     lsb(anonDef_)    ;:  return add of a anon def, \: 1 2 3;    \\ ret add of this                
-
-    REPDAT 5, lsb(aNop_)
+                            ;:  
                             ;;                
                             ;<  
                             ;=    
                             ;>  
                             ;?  
+                            ;@      
 
-    LITDAT 21
-    db     lsb(cFetch_)     ;@      byte fetch
+    LITDAT 20
     db     lsb(aNop_)       ;A
-    db     lsb(aNop_)       ;B      conditional break from loop
+    db     lsb(aNop_)       ;B      
     db     lsb(aNop_)       ;C
     db     lsb(depth_)      ;D      num items on stack
     db     lsb(emit_)       ;E      emit a char
@@ -177,12 +171,12 @@ iAltCodes:
     LITDAT 1
     db     lsb(exec_)       ;X      execute machine code 
     
-    REPDAT 2, lsb(aNop_)
+    REPDAT 3, lsb(aNop_)
                             ;Y
                             ;Z
+                            ;[      
 
-    LITDAT 2
-    db     lsb(cArrDef_)    ;[      byte array
+    LITDAT 1
     db     lsb(comment_)    ;\      comment text, skips reading until end of line
 
     REPDAT 4, lsb(aNop_)
@@ -191,13 +185,7 @@ iAltCodes:
                             ; _
                             ; `
 
-    REPDAT 8, lsb(altVar_)  ;a...h
-
-    LITDAT 2
-    db     lsb(i_)          ;i  returns index variable of current loop          
-    db     lsb(j_)          ;j  returns index variable of outer loop     \i+6     
-
-    REPDAT 16, lsb(altVar_) ;k...z
+    REPDAT 26, lsb(altVar_)  ;a...z
 
     ENDDAT 
 
@@ -436,6 +424,7 @@ lookupRef3:
     ld A,0
     ADC A,H
     ld H,A
+    ld (vPointer),hl            ; store address in pointer   
     XOR A
     or E                        ; sets Z flag if A-Z
     RET
@@ -646,15 +635,6 @@ dup_:
     push    hl
     push    hl
     jp (IY)
-at_:                         ; Fetch the value from the address placed on the top of the stack      
-fetch_:
-    pop hl              
-fetch1:
-    ld E,(hl)         
-    inc hl             
-    ld D,(hl)         
-    push de              
-    jp (IY)           
 
 percent_:  
 over_:
@@ -700,13 +680,17 @@ shr1:
 
 bang_:                         ; Store the value at the address placed on the top of the stack
 store_:
-    pop hl               
-    pop de               
-    ld (hl),E          
-    inc hl              
-    ld (hl),D          
-    jp (IY)            
-                              
+assign:
+    pop de                      ; discard last accessed value
+    pop de                      ; de = new value
+assign0:
+    ld hl,(vPointer)            ; hl = pointer
+assign1:
+    ld (hl),e                   ; ignore byte mode to allow assigning to vByteMode           
+    inc hl    
+    ld (hl),d
+    jp (iy) 
+
 ; $ swap                        ; a b -- b a Swap the top 2 elements of the stack
 dollar_:        
 swap_:
@@ -766,8 +750,17 @@ less:
 var_:
     ld A,(BC)
     call lookupRef2
-    push hl
-    jp (IY)
+var1:
+    ld d,0
+    ld e,(hl)
+    ld a,(vByteMode)                   
+    dec a                       ; is it byte?
+    jr z,var2
+    inc hl
+    ld d,(hl)
+var2:
+    push de
+    jp (iy)
 
 grave_:                         
 str:                                                      
@@ -795,6 +788,7 @@ hex1:
     SUB 7                       ; sub 7  to make $A - $F
     jp hex2
 
+at_:                         ; Fetch the value from the address placed on the top of the stack      
 lparen_: 
 rparen_: 		
 nop_: 
@@ -951,12 +945,6 @@ altVar_:
 anop_:
     jp (IY)                    
 
-anonDef_:                           ;= 7        
-    inc BC
-    ld de,(vHeapPtr)            ; start of defintion
-    push de
-    jp def1
-
 arrSize_:
 arrSize:
     pop hl
@@ -967,17 +955,6 @@ arrSize:
     push de
     jp (iy)
 
-cArrDef_:                           ; define a byte array
-    ld A,TRUE
-    jp arrDef1
-
-cFetch_:
-    pop     hl          
-    ld      D,0            
-    ld      E,(hl)         
-    push    de              
-    jp (IY)           
-
 comment_:
     inc BC                      ; point to next char
     ld A,(BC)
@@ -986,12 +963,6 @@ comment_:
     dec BC
     jp   (IY) 
 
-cStore_:	  
-    pop    hl               
-    pop    de               
-    ld     (hl),E          
-    jp     (IY)            
-                         
 depth_:
 depth:
     ld hl,0
@@ -1053,18 +1024,6 @@ inPort_:			    ; \<
     push hl
     jp (IY)        
 
-i_:
-    ld hl,(vLoopSP)
-    push hl
-    jp (IY)
-
-j_:                                 ;=9  
-    ld hl,(vLoopSP)             ;the address of j is 6 bytes more than i
-    ld de,6
-    add hl,de
-    push hl
-    jp (IY)
-    
 newln_:
     call crlf
     jp (IY)        
@@ -1089,18 +1048,6 @@ printStk:                           ;=40
 ; Page 5 primitive routines continued
 ;*******************************************************************
 
-; ********************************************************************************
-; Number Handling Routine - converts numeric ascii string to a 16-bit number in hl
-; Read the first character. 
-;			
-; Number characters ($30 to $39) are converted to digits by subtracting $30
-; and then added into the L register. (hl forms a 16-bit accumulator)
-; Fetch the next character, if it is a number, multiply contents of hl by 10
-; and then add in the next digit. Repeat this until a non-number character is 
-; detected. add in the final digit so that hl contains the converted number.
-; push hl onto the stack and proceed to the dispatch routine.
-; ********************************************************************************
-     
 num:
 	ld hl,$0000				    ; Clear hl to accept the number
 	ld a,(bc)				    ; Get numeral or -
@@ -1185,9 +1132,17 @@ editDef3:
 ; is found.
 ; ***************************************************************************
 
-def:                                ; Create a colon definition
+def:                            ; Create a colon definition
     inc BC
     ld  A,(BC)                  ; Get the next character
+    cp ":"                      ; is it anonymouse
+    jr nz,def0
+    inc BC
+    ld de,(vHeapPtr)            ; return start of definition
+    push de
+    jp def1
+    
+def0:    
     ld (vLastDef),A
     call lookupRef
     ld de,(vHeapPtr)            ; start of defintion
@@ -1195,7 +1150,7 @@ def:                                ; Create a colon definition
     inc hl              
     ld (hl),D                   ; Save high byte of address in CFA+1
     inc BC
-def1:                               ; Skip to end of definition   
+def1:                           ; Skip to end of definition   
     ld A,(BC)                   ; Get the next character
     inc BC                      ; Point to next character
     ld (de),A

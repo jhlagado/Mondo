@@ -62,7 +62,7 @@ vHeapPtr:   DS 2                ; h
             DS 2                ; m  
             DS 2                ; n
             DS 2                ; o
-            DS 2                ; p
+vPointer:   DS 2                ; p
             DS 2                ; q
             DS 2                ; r     
             DS 2                ; s

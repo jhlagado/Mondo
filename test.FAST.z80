@@ -6,7 +6,6 @@
     .include "IOSerial.asm"
     
     LD SP,DSTACK
-    ; CALL init
     JP testsStart
     
     .include "MAIN.asm"
