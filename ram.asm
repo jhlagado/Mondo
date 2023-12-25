@@ -28,7 +28,6 @@ mintVars:
             DS $30
 vLoopSP:    DS 2                ; 
 
-vByteMode:  DS 2                ; 
 tbPtr:      DS 2                ; reserved for tests
 vTemp1:     ds 2                ; 
 vTemp2:     ds 2                ; 
@@ -51,7 +50,7 @@ altVars:
 vS0:        DS 2                ; a
 vBase16:    DS 2                ; b
 vCarry:     DS 2                ; c
-vNS:        DS 2                ; d
+vByteMode:  DS 2                ; d
 vLastDef:   DS 2                ; e
             DS 2                ; f
             DS 2                ; g

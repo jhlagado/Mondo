@@ -16,11 +16,11 @@
 
 testsStart:
 
-    test "#10", $10
+    ; test "#10", $10
 
-    CALL printStr
-    .cstr "Done!!\r\n"
-    HALT
+    ; CALL printStr
+    ; .cstr "Done!!\r\n"
+    ; HALT
 
     test "1", 1
     test "0", 0
@@ -83,22 +83,6 @@ testsStart:
     test "\\[1 2 3]1+\\@", 2
     test "\\h@\\[1 2 3]'\\h@$-", 5
     test "\\h@\\[1]'\\h@$-", 3
-    test "0 0(1+)", 0
-    test "0 1(1+)", 1
-    test "0 2(1+)", 2
-    test "0 1(0(1+))", 0
-    test "0 1(1(1+))", 1
-    test "0 2(1(1+))", 2
-    test "0 2(2(1+))", 4
-    test "0 1(\\i@+)", 0
-    test "0 2(\\i@+)", 1
-    test "0 3(\\i@+)", 3
-    test "0t! 10(1 t@+t!) t@",10
-    test "0t! 2(2(\\i@ \\j@ + t@ + t! )) t@", 4
-    test "0(100)(200)",200
-    test "1(100)(200)",100
-    test "0t! 10(\\i@ 4>\\B \\i@ 1 t@+t!) t@",5
-    test "0t! [1 2 3] a! a@\\S ( a@ \\i@ _ @ t@+t! ) t@", 6
     test "\\: 1 ; \\G", 1
     test "[\\: 10 ;] 0_@ \\G", 10
     test "[\\: 10 ; \\: 20 ; \\: 30 ;] 2_@ \\G",30
@@ -107,3 +91,19 @@ testsStart:
     .cstr "`Done!`"
     HALT
     
+    ; test "0 0(1+)", 0
+    ; test "0 1(1+)", 1
+    ; test "0 2(1+)", 2
+    ; test "0 1(0(1+))", 0
+    ; test "0 1(1(1+))", 1
+    ; test "0 2(1(1+))", 2
+    ; test "0 2(2(1+))", 4
+    ; test "0 1(\\i@+)", 0
+    ; test "0 2(\\i@+)", 1
+    ; test "0 3(\\i@+)", 3
+    ; test "0t! 10(1 t@+t!) t@",10
+    ; test "0t! 2(2(\\i@ \\j@ + t@ + t! )) t@", 4
+    ; test "0(100)(200)",200
+    ; test "1(100)(200)",100
+    ; test "0t! 10(\\i@ 4>\\B \\i@ 1 t@+t!) t@",5
+    ; test "0t! [1 2 3] a! a@\\S ( a@ \\i@ _ @ t@+t! ) t@", 6

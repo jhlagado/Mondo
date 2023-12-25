@@ -149,7 +149,7 @@ iAltCodes:
     LITDAT 21
     db     lsb(cFetch_)     ;@      byte fetch
     db     lsb(aNop_)       ;A
-    db     lsb(break_)      ;B      conditional break from loop
+    db     lsb(aNop_)       ;B      conditional break from loop
     db     lsb(aNop_)       ;C
     db     lsb(depth_)      ;D      num items on stack
     db     lsb(emit_)       ;E      emit a char
@@ -795,13 +795,19 @@ hex1:
     SUB 7                       ; sub 7  to make $A - $F
     jp hex2
 
-nop_: jp NEXT             ; hardwire white space to always go to NEXT (important for arrays)
-num_: jp num
-lparen_: jp begin
-rparen_: jp again		
-lbrack_:jp arrDef    
-rbrack_:jp arrEnd
-colon_: jp def
+lparen_: 
+rparen_: 		
+nop_: 
+    jp NEXT             ; hardwire white space to always go to NEXT (important for arrays)
+
+num_: 
+    jp num
+lbrack_:
+    jp arrDef    
+rbrack_:
+    jp arrEnd
+colon_: 
+    jp def
 
 underscore_: jr arrIndex
 star_: jr mul      
@@ -922,72 +928,6 @@ div10:
     jp (iy)
 
     	                    ;=57                     
-begin:                              ; Left parentheses begins a loop
-    pop hl
-    ld A,L                      ; zero?
-    or H
-    jr Z,begin1
-    push IX
-    ld IX,(vLoopSP)
-    ld de,-6
-    add IX,de
-    ld (IX+0),0                 ; loop var
-    ld (IX+1),0                 
-    ld (IX+2),L                 ; loop limit
-    ld (IX+3),H                 
-    ld (IX+4),C                 ; loop address
-    ld (IX+5),B                 
-    ld (vLoopSP),IX
-    pop IX
-    jp (IY)
-begin1:
-    ld E,1
-begin2:
-    inc BC
-    ld A,(BC)
-    call nesting
-    XOR A
-    or E
-    jr NZ,begin2
-    ld hl,1
-begin3:
-    inc BC
-    ld A,(BC)
-    dec BC
-    CP "("
-    jr NZ,begin4
-    push hl
-begin4:        
-    jp (IY)
-
-again:                              ;=72
-    push IX
-    ld IX,(vLoopSP)
-    ld E,(IX+0)                 ; peek loop var
-    ld D,(IX+1)                 
-    ld L,(IX+2)                 ; peek loop limit
-    ld H,(IX+3)                 
-    dec hl
-    or A
-    SBC hl,de
-    jr Z,again2
-    inc de
-    ld (IX+0),E                 ; poke loop var
-    ld (IX+1),D                 
-again1:
-    ld C,(IX+4)                 ; peek loop address
-    ld B,(IX+5)                 
-    jr again4
-again2:   
-    ld de,6                     ; drop loop frame
-again3:
-    add IX,de
-again4:
-    ld (vLoopSP),IX
-    pop IX
-    ld hl,0                     ; skip ELSE clause
-    jr begin3               
-
 carry:                              ;=10
     ld hl,0
     rl l
@@ -1026,17 +966,6 @@ arrSize:
     ld e,(hl)
     push de
     jp (iy)
-
-break_:
-    pop hl
-    ld A,L                      ; zero?
-    or H
-    jr NZ,break1
-    jp (IY)
-break1:
-    ld de,6                     ; drop loop frame
-    add IX,de
-    jp begin1                   ; skip to end of loop        
 
 cArrDef_:                           ; define a byte array
     ld A,TRUE
