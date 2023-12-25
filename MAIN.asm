@@ -60,60 +60,60 @@ printStack_:
 
 iOpcodes:
     LITDAT 15
-    db    lsb(store_)   ;   !            
-    db    lsb(dup_)     ;   "
-    db    lsb(hex_)     ;    #
-    db    lsb(swap_)    ;    $            
-    db    lsb(over_)    ;    %            
-    db    lsb(and_)     ;    &
-    db    lsb(drop_)    ;    '
-    db    lsb(begin_)   ;    (        
-    db    lsb(again_)   ;    )
-    db    lsb(mul_)     ;    *            
-    db    lsb(add_)     ;    +
-    db    lsb(hdot_)    ;    ,            
-    db    lsb(sub_)     ;    -
+    db    lsb(bang_)   ;   !            
+    db    lsb(dquote_)     ;   "
+    db    lsb(hash_)     ;    #
+    db    lsb(dollar_)    ;    $            
+    db    lsb(percent_)    ;    %            
+    db    lsb(amper_)     ;    &
+    db    lsb(quote_)    ;    '
+    db    lsb(lparen_)   ;    (        
+    db    lsb(rparen_)   ;    )
+    db    lsb(star_)     ;    *            
+    db    lsb(plus_)     ;    +
+    db    lsb(comma_)    ;    ,            
+    db    lsb(minus_)     ;    -
     db    lsb(dot_)     ;    .
-    db    lsb(div_)     ;    /	;/MOD
+    db    lsb(slash_)     ;    /	;/MOD
 
     REPDAT 10, lsb(num_)		; 10 x repeat lsb of add to the num routine 
 
     LITDAT 7
-    db    lsb(def_)    ;    :        
-    db    lsb(ret_)    ;    ;
+    db    lsb(colon_)    ;    :        
+    db    lsb(semi_)    ;    ;
     db    lsb(lt_)     ;    <
     db    lsb(eq_)     ;    =            
     db    lsb(gt_)     ;    >            
-    db    lsb(key_)    ;    ?   ( -- val )  read a char from input
-    db    lsb(fetch_)  ;    @    
+    db    lsb(question_)    ;    ?   ( -- val )  read a char from input
+    db    lsb(at_)  ;    @    
 
     REPDAT 26, lsb(call_)		; call a command A, B ....Z
 
     LITDAT 6
-    db    lsb(arrDef_) ;    [
-    db    lsb(alt_)    ;    \
-    db    lsb(arrEnd_) ;    ]
-    db    lsb(xor_)    ;    ^
-    db    lsb(arrIndex_)    ;    _   
-    db    lsb(str_)    ;    `   ; for printing `hello`        
+    db    lsb(lbrack_) ;    [
+    db    lsb(bslash_)    ;    \
+    db    lsb(rbrack_) ;    ]
+    db    lsb(caret_)    ;    ^
+    db    lsb(underscore_)    ;    _   
+    db    lsb(grave_)    ;    `   ; for printing `hello`        
 
     REPDAT 26, lsb(var_)		; a b c .....z
 
     LITDAT 4
-    db    lsb(shl_)    ;    {
-    db    lsb(or_)     ;    |            
-    db    lsb(shr_)    ;    }            
-    db    lsb(rot_)    ;    ~ ( a b c -- b c a ) rotate            
+    db    lsb(lbrace_)    ;    {
+    db    lsb(pipe_)     ;    |            
+    db    lsb(rbrace_)    ;    }            
+    db    lsb(tilde_)    ;    ~ ( a b c -- b c a ) rotate            
 
 iAltCodes:
 
     LITDAT 4
-    db     lsb(cstore_)     ;!  byte store     
+    db     lsb(cStore_)      ;!  byte store     
     db     lsb(aNop_)       ;"  				
     db     lsb(aNop_)       ;#  edit definition 				
     db     lsb(newln_)      ;$  prints a newline to output	
 
-    REPDAT 7, lsb(aNop_)
+    REPDAT 21, lsb(aNop_)
                             ; %
                             ; &
                             ; '
@@ -121,12 +121,8 @@ iAltCodes:
                             ; )
                             ; *
                             ; +
-
-    LITDAT 2
-    db     lsb(emit_)       ;,  ( b -- ) prints a char              
-    db     lsb(depth_)      ;-  num items on stack
-
-    REPDAT 12, lsb(aNop_)
+                            ;,                
+                            ;-  
                             ;.              
                             ;/                
                             ;0
@@ -218,7 +214,7 @@ start:
     ld SP,DSTACK		; start of Mondo
     call init		    ; setups
     call printStr		; prog count to stack, put code line 235 on stack then call print
-    .cstr "MINT1.3\r\n"
+    .cstr "Mondo 0.1\r\n"
 
 interpret:
     call prompt
@@ -572,7 +568,8 @@ enter:                              ;=9
     .align $100
 page4:
 
-and_:        
+amper_:        
+and_:
     pop     de          ;     Bitwise and the top 2 elements of the stack
     pop     hl          ;    
     ld      A,E         ;   
@@ -586,7 +583,8 @@ and1:
     jp (IY)        ;   
     
                         ; 
-or_: 		 
+pipe_: 		 
+or_:
     pop     de             ; Bitwise or the top 2 elements of the stack
     pop     hl
     ld      A,E
@@ -596,9 +594,9 @@ or_:
     or      H
     jr and1
 
-xor_:		 
+caret_:		 
+xor_:
     pop     de              ; Bitwise XOR the top 2 elements of the stack
-xor1:
     pop     hl
     ld      A,E
     XOR     L
@@ -607,19 +605,14 @@ xor1:
     XOR     H
     jr and1
 
-inv_:				; Bitwise INVert the top member of the stack
-    ld de, $FFFF            ; by xoring with $FFFF
-    jr xor1        
-
-add_:                           ; add the top 2 members of the stack
+plus_:                           ; add the top 2 members of the stack
+add_:
     pop     de                 
     pop     hl                 
     add     hl,de              
     push    hl                 
     jp carry              
                              
-again_: jp again		; close loop
-
 call_:
     ld A,(BC)
     call lookupRef1
@@ -636,21 +629,25 @@ dot2:
     call putChar
     jp (IY)
 
-hdot_:                          ; print hexadecimal
+comma_:                          ; print hexadecimal
+hdot_:
     pop     hl
     call printhex
     jr   dot2
 
-drop_:                          ; Discard the top member of the stack
+quote_:                          ; Discard the top member of the stack
+drop_:
     pop     hl
     jp (IY)
 
-dup_:        
+dquote_:        
+dup_:
     pop     hl              ; Duplicate the top member of the stack
     push    hl
     push    hl
     jp (IY)
-fetch_:                         ; Fetch the value from the address placed on the top of the stack      
+at_:                         ; Fetch the value from the address placed on the top of the stack      
+fetch_:
     pop hl              
 fetch1:
     ld E,(hl)         
@@ -659,11 +656,8 @@ fetch1:
     push de              
     jp (IY)           
 
-nop_:       
-    jp NEXT             ; hardwire white space to always go to NEXT (important for arrays)
-
-
-over_:  
+percent_:  
+over_:
     pop hl              ; Duplicate 2nd element of the stack
     pop de
     push de
@@ -671,12 +665,14 @@ over_:
     push de              ; and push it to top of stack
     jp (IY)        
 
+semi_:
 ret_:
     call rpop               ; Restore Instruction pointer
     ld BC,hl                
     jp (IY)             
 
-rot_:                               ; a b c -- b c a
+tilde_:                               ; a b c -- b c a
+rotate_:
     pop de                      ; a b                   de = c
     pop hl                      ; a                     hl = b
     EX (SP),hl                  ; b                     hl = a
@@ -685,14 +681,16 @@ rot_:                               ; a b c -- b c a
     jp (IY)
 
 ;  Left shift { is multiply by 2		
-shl_:   
+lbrace_:   
+shl_:
     pop hl                  ; Duplicate the top member of the stack
     add hl,hl
-    push hl                 ; shift left fallthrough into add_     
+    push hl                 ; shift left fallthrough into plus_     
     jp (IY)                 ;   
 
 			;  Right shift } is a divide by 2		
-shr_:    
+rbrace_:    
+shr_:
     pop hl                  ; Get the top member of the stack
 shr1:
     SRL H
@@ -700,7 +698,8 @@ shr1:
     push hl
     jp (IY)                 ;   
 
-store_:                         ; Store the value at the address placed on the top of the stack
+bang_:                         ; Store the value at the address placed on the top of the stack
+store_:
     pop hl               
     pop de               
     ld (hl),E          
@@ -709,13 +708,15 @@ store_:                         ; Store the value at the address placed on the t
     jp (IY)            
                               
 ; $ swap                        ; a b -- b a Swap the top 2 elements of the stack
-swap_:        
+dollar_:        
+swap_:
     pop hl
     EX (SP),hl
     push hl
     jp (IY)
     
-sub_:       		    ; Subtract the value 2nd on stack from top of stack 
+minus_:       		    ; Subtract the value 2nd on stack from top of stack 
+sub_:
     inc bc              ; check if sign of a number
     ld a,(bc)
     dec bc
@@ -768,7 +769,7 @@ var_:
     push hl
     jp (IY)
 
-str_:                         
+grave_:                         
 str:                                                      
     inc BC
     
@@ -783,7 +784,8 @@ str2:
     dec BC
     jp   (IY) 
 
-hex_:
+hash_:
+hex:
     ld hl,0	    		    ; Clear hl to accept the number
 hex1:
     inc BC
@@ -793,16 +795,18 @@ hex1:
     SUB 7                       ; sub 7  to make $A - $F
     jp hex2
 
-num_:   jp num
-begin_: jp begin
-arrDef_:jp arrDef    
-arrEnd_:jp arrEnd
-def_:   jp def
+nop_: jp NEXT             ; hardwire white space to always go to NEXT (important for arrays)
+num_: jp num
+lparen_: jp begin
+rparen_: jp again		
+lbrack_:jp arrDef    
+rbrack_:jp arrEnd
+colon_: jp def
 
-arrIndex_: jr arrIndex
-mul_:   jr mul      
-div_:   jr div
-alt_:   
+underscore_: jr arrIndex
+star_: jr mul      
+slash_: jr div
+bslash_:
 
 ;*******************************************************************
 ; Page 5 primitive routines 
@@ -821,7 +825,7 @@ alt2:
     ld L,A                      
     jp (hl)                     ;       Jump to routine
 
-key_:
+question_:
     call getchar
     ld H,0
     ld L,A
