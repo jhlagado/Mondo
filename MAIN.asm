@@ -20,6 +20,8 @@
     CTRL_L      equ 12
     CTRL_P      equ 16
 
+    BSLASH      equ $5c
+
 .macro LITDAT,len
     db len
 .endm
@@ -60,91 +62,57 @@ printStack_:
 
 iOpcodes:
     LITDAT 15
-    db    lsb(bang_)   ;   !            
-    db    lsb(dquote_)     ;   "
-    db    lsb(hash_)     ;    #
-    db    lsb(dollar_)    ;    $            
-    db    lsb(percent_)    ;    %            
-    db    lsb(amper_)     ;    &
-    db    lsb(quote_)    ;    '
-    db    lsb(lparen_)   ;    (        
-    db    lsb(rparen_)   ;    )
-    db    lsb(star_)     ;    *            
-    db    lsb(plus_)     ;    +
-    db    lsb(comma_)    ;    ,            
-    db    lsb(minus_)     ;    -
-    db    lsb(dot_)     ;    .
-    db    lsb(slash_)     ;    /	;/MOD
+    db    lsb(bang_)        ;    !            
+    db    lsb(dquote_)      ;    "
+    db    lsb(hash_)        ;    #
+    db    lsb(dollar_)      ;    $            
+    db    lsb(percent_)     ;    %            
+    db    lsb(amper_)       ;    &
+    db    lsb(quote_)       ;    '
+    db    lsb(lparen_)      ;    (        
+    db    lsb(rparen_)      ;    )
+    db    lsb(star_)        ;    *            
+    db    lsb(plus_)        ;    +
+    db    lsb(comma_)       ;    ,            
+    db    lsb(minus_)       ;    -
+    db    lsb(dot_)         ;    .
+    db    lsb(slash_)       ;    /	;/MOD
 
     REPDAT 10, lsb(num_)		; 10 x repeat lsb of add to the num routine 
 
     LITDAT 7
-    db    lsb(colon_)    ;    :        
-    db    lsb(semi_)    ;    ;
-    db    lsb(lt_)     ;    <
-    db    lsb(eq_)     ;    =            
-    db    lsb(gt_)     ;    >            
+    db    lsb(colon_)       ;    :        
+    db    lsb(semi_)        ;    ;
+    db    lsb(lt_)          ;    <
+    db    lsb(eq_)          ;    =            
+    db    lsb(gt_)          ;    >            
     db    lsb(question_)    ;    ?   ( -- val )  read a char from input
-    db    lsb(at_)  ;    @    
+    db    lsb(at_)          ;    @    
 
-    REPDAT 26, lsb(call_)		; call a command A, B ....Z
+    REPDAT 26, lsb(call_)	; call a command A, B ....Z
 
     LITDAT 6
-    db    lsb(lbrack_) ;    [
-    db    lsb(bslash_)    ;    \
-    db    lsb(rbrack_) ;    ]
-    db    lsb(caret_)    ;    ^
-    db    lsb(underscore_)    ;    _   
-    db    lsb(grave_)    ;    `   ; for printing `hello`        
+    db    lsb(lbrack_)      ;    [
+    db    lsb(bslash_)      ;    \
+    db    lsb(rbrack_)      ;    ]
+    db    lsb(caret_)       ;    ^
+    db    lsb(underscore_)  ;    _   
+    db    lsb(grave_)       ;    `   ; for printing `hello`        
 
-    REPDAT 26, lsb(var_)		; a b c .....z
+    REPDAT 26, lsb(var_)	; a b c .....z
 
     LITDAT 4
-    db    lsb(lbrace_)    ;    {
-    db    lsb(pipe_)     ;    |            
-    db    lsb(rbrace_)    ;    }            
-    db    lsb(tilde_)    ;    ~ ( a b c -- b c a ) rotate            
+    db    lsb(lbrace_)      ;    {
+    db    lsb(pipe_)        ;    |            
+    db    lsb(rbrace_)      ;    }            
+    db    lsb(tilde_)       ;    ~ ( a b c -- b c a ) rotate            
 
 iAltCodes:
-
-    REPDAT 32, lsb(aNop_)
-                            ;!       
-                            ;"  				
-                            ;#   				
-                            ;$  	
-                            ;%
-                            ;&
-                            ;'
-                            ;(
-                            ;)
-                            ;*
-                            ;+
-                            ;,                
-                            ;-  
-                            ;.              
-                            ;/                
-                            ;0
-                            ;1
-                            ;2
-                            ;3
-                            ;4
-                            ;5
-                            ;6
-                            ;7
-                            ;8
-                            ;9
-                            ;:  
-                            ;;                
-                            ;<  
-                            ;=    
-                            ;>  
-                            ;?  
-                            ;@      
-
-    LITDAT 20
-    db     lsb(aNop_)       ;A
-    db     lsb(aNop_)       ;B      
-    db     lsb(aNop_)       ;C
+    REPDAT 3, lsb(aNop_)
+                            ;A
+                            ;B
+                            ;C
+    LITDAT 17
     db     lsb(depth_)      ;D      num items on stack
     db     lsb(emit_)       ;E      emit a char
     db     lsb(aNop_)       ;F
@@ -163,29 +131,18 @@ iAltCodes:
     db     lsb(arrSize_)    ;S      array size
     db     lsb(printStk_)   ;T      non-destructively prints stack
     
-    REPDAT 3, lsb(aNop_)
+    REPDAT 2, lsb(aNop_)
                             ;U
                             ;V
                             ;W      
     
-    LITDAT 1
+    LITDAT 2
+    db     lsb(while_)      ;W      while 
     db     lsb(exec_)       ;X      execute machine code 
     
     REPDAT 3, lsb(aNop_)
                             ;Y
                             ;Z
-                            ;[      
-
-    LITDAT 1
-    db     lsb(comment_)    ;\      comment text, skips reading until end of line
-
-    REPDAT 4, lsb(aNop_)
-                            ; ]
-                            ; ^
-                            ; _
-                            ; `
-
-    REPDAT 26, lsb(altVar_)  ;a...z
 
     ENDDAT 
 
@@ -352,8 +309,8 @@ etx1:
 init:                           ;=68
     ld hl,LSTACK
     ld (vLoopSP),hl         ; Loop stack pointer stored in memory
-    ld IX,RSTACK
-    ld IY,NEXT		; IY provides a faster jump to NEXT
+    ld ix,RSTACK
+    ld iy,NEXT		; iy provides a faster jump to NEXT
 
     ld hl,altVars               ; init altVars to 0 
     ld b,26 * 2
@@ -403,28 +360,19 @@ initOps2a:
     DJNZ initOps2a
     jr initOps1
 
-lookupRef:
-    ld D,0
-lookupRef0:
-    CP "a"
-    jr NC,lookupRef2
-lookupRef1:
-    SUB "A"
-    ld E,0
-    jr lookupRef3        
-lookupRef2:
-    SUB "a"
-    ld E,26*2
-lookupRef3:
+lookup:
+    sub "A"
+    jr lookup2 
+lookup1:
+    sub "a" - 26*2
+lookup2:
     add A,A
-    add A,E
     ld hl,VARS
     add A,L
     ld L,A
     ld A,0
     ADC A,H
     ld H,A
-    ld (vPointer),hl            ; store address in pointer   
     XOR A
     or E                        ; sets Z flag if A-Z
     RET
@@ -453,6 +401,39 @@ printhex3:
 	ADC	A,0x40
 	DAA
 	jp putchar
+
+editDef:                            ;=50 lookup up def based on number
+    pop hl                      ; pop ret address
+    EX (SP),hl                  ; swap with TOS                  
+    ld A,L
+    EX AF,AF'
+    ld A,L
+    call lookup
+    ld E,(hl)
+    inc hl
+    ld D,(hl)
+    ld A,D
+    or E
+    ld hl,TIB
+    jr Z,editDef3
+    ld A,":"
+    call writeChar
+    EX AF,AF'
+    call writeChar
+    jr editDef2
+editDef1:
+    inc de
+editDef2:        
+    ld A,(de)
+    call writeChar
+    CP ";"
+    jr NZ,editDef1
+editDef3:        
+    ld de,TIB
+    or A
+    SBC hl,de
+    ld (vTIBPtr),hl
+    RET
 
 ; **************************************************************************             
 ; calculate nesting value
@@ -524,17 +505,17 @@ putStr:
     RET
 
 rpush:                              ;=11
-    dec IX                  
-    ld (IX+0),H
-    dec IX
-    ld (IX+0),L
+    dec ix                  
+    ld (ix+0),H
+    dec ix
+    ld (ix+0),L
     RET
 
 rpop:                               ;=11
-    ld L,(IX+0)         
-    inc IX              
-    ld H,(IX+0)
-    inc IX                  
+    ld L,(ix+0)         
+    inc ix              
+    ld H,(ix+0)
+    inc ix                  
 rpop2:
     RET
 
@@ -548,7 +529,7 @@ enter:                              ;=9
     call rpush                      ; save Instruction Pointer
     pop BC
     dec BC
-    jp (IY)                    
+    jp (iy)                    
 
 
 ; **********************************************************************			 
@@ -569,7 +550,7 @@ and_:
 and1:
     ld      H,A         ;   
     push    hl          ;    
-    jp (IY)        ;   
+    jp (iy)        ;   
     
                         ; 
 pipe_: 		 
@@ -604,7 +585,7 @@ add_:
                              
 call_:
     ld A,(BC)
-    call lookupRef1
+    call lookup
     ld E,(hl)
     inc hl
     ld D,(hl)
@@ -616,7 +597,7 @@ dot_:
 dot2:
     ld A,' '           
     call putChar
-    jp (IY)
+    jp (iy)
 
 comma_:                          ; print hexadecimal
 hdot_:
@@ -627,14 +608,14 @@ hdot_:
 quote_:                          ; Discard the top member of the stack
 drop_:
     pop     hl
-    jp (IY)
+    jp (iy)
 
 dquote_:        
 dup_:
     pop     hl              ; Duplicate the top member of the stack
     push    hl
     push    hl
-    jp (IY)
+    jp (iy)
 
 percent_:  
 over_:
@@ -643,13 +624,13 @@ over_:
     push de
     push hl
     push de              ; and push it to top of stack
-    jp (IY)        
+    jp (iy)        
 
 semi_:
 ret_:
     call rpop               ; Restore Instruction pointer
     ld BC,hl                
-    jp (IY)             
+    jp (iy)             
 
 tilde_:                               ; a b c -- b c a
 rotate_:
@@ -658,7 +639,7 @@ rotate_:
     EX (SP),hl                  ; b                     hl = a
     push de                     ; b c             
     push hl                     ; b c a                         
-    jp (IY)
+    jp (iy)
 
 ;  Left shift { is multiply by 2		
 lbrace_:   
@@ -666,7 +647,7 @@ shl_:
     pop hl                  ; Duplicate the top member of the stack
     add hl,hl
     push hl                 ; shift left fallthrough into plus_     
-    jp (IY)                 ;   
+    jp (iy)                 ;   
 
 			;  Right shift } is a divide by 2		
 rbrace_:    
@@ -676,7 +657,7 @@ shr1:
     SRL H
     RR L
     push hl
-    jp (IY)                 ;   
+    jp (iy)                 ;   
 
 bang_:                         ; Store the value at the address placed on the top of the stack
 store_:
@@ -697,7 +678,7 @@ swap_:
     pop hl
     EX (SP),hl
     push hl
-    jp (IY)
+    jp (iy)
     
 minus_:       		    ; Subtract the value 2nd on stack from top of stack 
 sub_:
@@ -745,12 +726,13 @@ equal:
     inc L              ; hl = 1    
 less:     
     push hl
-    jp (IY) 
+    jp (iy) 
     
 var_:
     ld A,(BC)
-    call lookupRef2
+    call lookup1
 var1:
+    ld (vPointer),hl
     ld d,0
     ld e,(hl)
     ld a,(vByteMode)                   
@@ -775,18 +757,7 @@ str1:
     jr str1
 str2:  
     dec BC
-    jp   (IY) 
-
-hash_:
-hex:
-    ld hl,0	    		    ; Clear hl to accept the number
-hex1:
-    inc BC
-    ld A,(BC)		    ; Get the character which is a numeral
-    BIT 6,A                     ; is it uppercase alpha?
-    jp Z, hex2                  ; no a decimal
-    SUB 7                       ; sub 7  to make $A - $F
-    jp hex2
+    jp   (iy) 
 
 at_:                         ; Fetch the value from the address placed on the top of the stack      
 lparen_: 
@@ -796,16 +767,21 @@ nop_:
 
 num_: 
     jp num
-lbrack_:
-    jp arrDef    
 rbrack_:
     jp arrEnd
 colon_: 
     jp def
 
-underscore_: jr arrIndex
-star_: jr mul      
-slash_: jr div
+lbrack_:
+    jr arrDef    
+underscore_: 
+    jr arrAccess
+hash_:
+    jr hex
+star_: 
+    jr mul      
+slash_: 
+    jr div
 bslash_:
 
 ;*******************************************************************
@@ -815,30 +791,76 @@ bslash_:
 alt:                                ;=11
     inc BC
     ld A,(BC)
-    ld hl,altCodes
-    sub "!"
-    add A,L
-    ld L,A
+    cp BSLASH
+    jp z,comment
+    cp "a"
+    jr nc,alt2
+    cp "A"
+    jr alt3
+
 alt2:
-    ld A,(hl)                   ;       get low jump address
-    ld hl,page6
+    sub "a" 
+    add A,A
+    ld hl,altVars
+    add a,l
+    ld l,a
+    jp var1
+
+alt3:
+    ld hl,altCodes
+    sub "A"
+    add a,l
+    ld l,a
+    ld a,(hl)                   ;       get low jump address
+    ld h,msb(page6)
     ld L,A                      
     jp (hl)                     ;       Jump to routine
+
+arrDef:                         
+    ld hl,0
+    add hl,sp                   ; save 
+    call rpush
+    jp (iy)
 
 question_:
     call getchar
     ld H,0
     ld L,A
     push hl
-    jp (IY)
+    jp (iy)
 
-arrIndex:
+arrAccess:
     pop hl                              ; hl = index  
     pop de                              ; de = array
+    ld a,(vByteMode)                   ; a = data width
+    dec a
+    jr z,arrAccess1
+arrAccess0:
     add hl,hl                           ; if data width = 2 then double 
+arrAccess1:
     add hl,de                           ; add addr
-    push hl
-    jp (iy)
+    jp var1
+
+hex:
+    ld hl,0	    		    ; Clear hl to accept the number
+hex1:
+    inc BC
+    ld A,(BC)		    ; Get the character which is a numeral
+    BIT 6,A                     ; is it uppercase alpha?
+    jp Z, hex2                  ; no a decimal
+    SUB 7                       ; sub 7  to make $A - $F
+hex2:
+    SUB $30                     ; Form decimal digit
+    jp C,num2
+    CP $0F+1
+    jp NC,num2
+    add hl,hl                   ; 2X ; Multiply digit(s) in hl by 16
+    add hl,hl                   ; 4X
+    add hl,hl                   ; 8X
+    add hl,hl                   ; 16X     
+    add A,L                     ; add into bottom of hl
+    ld  L,A                     ;   
+    jr  hex1
 
 mul:                                ;=19
     pop  de                     ; get first value
@@ -861,7 +883,7 @@ mul2:
     jr NZ,mul2
 	pop BC			    ; Restore the IP
 	push hl                     ; Put the product on the stack - stack bug fixed 2/12/21
-	jp (IY)
+	jp (iy)
 
 div:
     ld hl,bc                    ; hl = IP
@@ -928,22 +950,59 @@ carry:                              ;=10
     ld (vCarry),hl
     jp (iy)              
 
+arrEnd:                       
+    ld (vTemp1),bc              ; save IP
+    call rpop
+    ld (vTemp2),hl              ; save old SP
+    ld de,hl                    ; de = hl = old SP
+    or a 
+    sbc hl,sp                   ; hl = array count (items on stack)
+    srl h                       ; num items = num bytes / 2
+    rr l                        
+    ld bc,hl                    ; bc = count
+    ld hl,(vHeapPtr)            ; hl = array[-4]
+    ld (hl),c                   ; write num items in length word
+    inc hl
+    ld (hl),b
+    inc hl                      ; hl = array[0], bc = count
+                                ; de = old SP, hl = array[0], bc = count
+    jr arrayEnd2
+arrayEnd1:                        
+    dec bc                      ; dec items count
+    dec de
+    dec de
+    ld a,(de)                   ; a = lsb of stack item
+    ld (hl),a                   ; write lsb of array item
+    inc hl                      ; move to msb of array item
+    ld a,(vByteMode)            ; vByteMode=1? 
+    dec a
+    jr z,arrayEnd2
+    inc de
+    ld a,(de)                   ; a = msb of stack item
+    dec de
+    ld (hl),a                   ; write msb of array item
+    inc hl                      ; move to next word in array
+arrayEnd2:
+    ld a,c                      ; if not zero loop
+    or b
+    jr nz,arrayEnd1
+    ex de,hl                    ; de = end of array 
+    ld hl,(vTemp2)
+    ld sp,hl                    ; SP = old SP
+    ld hl,(vHeapPtr)            ; de = array[-2]
+    inc hl
+    inc hl
+    push hl                     ; return array[0]
+    ld (vHeapPtr),de            ; move heap* to end of array
+    ld bc,(vTemp1)              ; restore IP
+    jp (iy)
+
 ; **************************************************************************
 ; Page 6 Alt primitives
 ; **************************************************************************
     .align $100
 page6:
 
-
-altVar_:
-    ld A,(BC)
-    SUB "a" - ((altVars - mintVars)/2) 
-    add A,A
-    ld H,msb(mintVars)
-    ld L,A
-    push hl
-anop_:
-    jp (IY)                    
 
 arrSize_:
 arrSize:
@@ -953,15 +1012,8 @@ arrSize:
     dec hl                      ; lsb size 
     ld e,(hl)
     push de
+anop_:
     jp (iy)
-
-comment_:
-    inc BC                      ; point to next char
-    ld A,(BC)
-    CP "\r"                     ; terminate at cr 
-    jr NZ,comment_
-    dec BC
-    jp   (IY) 
 
 depth_:
 depth:
@@ -977,11 +1029,11 @@ emit_:
     pop hl
     ld A,L
     call putchar
-    jp (IY)
+    jp (iy)
 
 exec_:
     call exec1
-    jp (IY)
+    jp (iy)
 exec1:
     pop hl
     EX (SP),hl
@@ -989,11 +1041,11 @@ exec1:
 
 editDef_:
     call editDef
-    jp (IY)
+    jp (iy)
 
 prompt_:
     call prompt
-    jp (IY)
+    jp (iy)
 
 
 go_:				    ;\^
@@ -1012,7 +1064,7 @@ go2:
     ld BC,de
     dec BC
 go3:
-    jp (IY)                     
+    jp (iy)                     
 
 inPort_:			    ; \<
     pop hl
@@ -1022,11 +1074,11 @@ inPort_:			    ; \<
     ld H,0
     ld C,A
     push hl
-    jp (IY)        
+    jp (iy)        
 
 newln_:
     call crlf
-    jp (IY)        
+    jp (iy)        
 
 outPort_:
     pop hl
@@ -1035,18 +1087,62 @@ outPort_:
     pop hl
     OUT (C),L
     ld C,E
-    jp (IY)        
+    jp (iy)        
 
 printStk_:
 printStk:                           ;=40
     ; Mondo: \a@2- \- 1- ("@ \b@ \(,)(.) 2-) '             
     call ENTER
     .cstr "`=> `\\a@2- \\- 1-(",$22,"@.2-)'\\N"             
-    jp (IY)
+    jp (iy)
+
+while_:
+while:
+    pop hl
+    ld a,l
+    or h
+    jr nz,while2
+    pop bc                      ; IP = )
+    pop bc                      ; IP = (
+    inc bc                      ; IP = one after )
+while2:
+    jp (iy)
 
 ;*******************************************************************
 ; Page 5 primitive routines continued
 ;*******************************************************************
+
+def:                            ; Create a colon definition
+    inc BC
+    ld  A,(BC)                  ; Get the next character
+    cp ":"                      ; is it anonymouse
+    jr nz,def0
+    inc BC
+    ld de,(vHeapPtr)            ; return start of definition
+    push de
+    jp def1
+    
+def0:    
+    ld (vLastDef),A
+    call lookup
+    ld de,(vHeapPtr)            ; start of defintion
+    ld (hl),E                   ; Save low byte of address in CFA
+    inc hl              
+    ld (hl),D                   ; Save high byte of address in CFA+1
+    inc BC
+def1:                           ; Skip to end of definition   
+    ld A,(BC)                   ; Get the next character
+    inc BC                      ; Point to next character
+    ld (de),A
+    inc de
+    CP ";"                      ; Is it a semicolon 
+    jr Z, def2                  ; end the definition
+    jr  def1                    ; get the next element
+def2:    
+    dec BC
+def3:
+    ld (vHeapPtr),de            ; bump heap ptr to after definiton
+    jp (iy)       
 
 num:
 	ld hl,$0000				    ; Clear hl to accept the number
@@ -1089,80 +1185,6 @@ num3:
 ;*******************************************************************
 ; Subroutines
 ;*******************************************************************
-
-editDef:                            ;=50 lookup up def based on number
-    pop hl                      ; pop ret address
-    EX (SP),hl                  ; swap with TOS                  
-    ld A,L
-    EX AF,AF'
-    ld A,L
-    call lookupRef
-    ld E,(hl)
-    inc hl
-    ld D,(hl)
-    ld A,D
-    or E
-    ld hl,TIB
-    jr Z,editDef3
-    ld A,":"
-    call writeChar
-    EX AF,AF'
-    call writeChar
-    jr editDef2
-editDef1:
-    inc de
-editDef2:        
-    ld A,(de)
-    call writeChar
-    CP ";"
-    jr NZ,editDef1
-editDef3:        
-    ld de,TIB
-    or A
-    SBC hl,de
-    ld (vTIBPtr),hl
-    RET
-
-; **************************************************************************             
-; def is used to create a colon definition
-; When a colon is detected, the next character (usually uppercase alpha)
-; is looked up in the vector table to get its associated code field address
-; This CFA is updated to point to the character after uppercase alpha
-; The remainder of the characters are then skipped until after a semicolon  
-; is found.
-; ***************************************************************************
-
-def:                            ; Create a colon definition
-    inc BC
-    ld  A,(BC)                  ; Get the next character
-    cp ":"                      ; is it anonymouse
-    jr nz,def0
-    inc BC
-    ld de,(vHeapPtr)            ; return start of definition
-    push de
-    jp def1
-    
-def0:    
-    ld (vLastDef),A
-    call lookupRef
-    ld de,(vHeapPtr)            ; start of defintion
-    ld (hl),E                   ; Save low byte of address in CFA
-    inc hl              
-    ld (hl),D                   ; Save high byte of address in CFA+1
-    inc BC
-def1:                           ; Skip to end of definition   
-    ld A,(BC)                   ; Get the next character
-    inc BC                      ; Point to next character
-    ld (de),A
-    inc de
-    CP ";"                      ; Is it a semicolon 
-    jr Z, def2                  ; end the definition
-    jr  def1                    ; get the next element
-def2:    
-    dec BC
-def3:
-    ld (vHeapPtr),de            ; bump heap ptr to after definiton
-    jp (IY)       
 
 ; hl = value
 printDec:    
@@ -1212,75 +1234,36 @@ printDec7:
     ld a,b
     jp putchar
 
-arrDef:                         
-    ld A,FALSE
-arrDef1:      
-    ld (vByteMode),A
-    ld hl,0
-    add hl,sp                   ; save 
-    call rpush
+; loop start
+lparen:
+begin:                          
+    push bc                     ; save IP
+    ld E,1                      ; skip to loop end, nesting = 1
+begin2:
+    inc BC
+    ld A,(BC)
+    call nesting
+    XOR A
+    or E
+    jr NZ,begin2
+    pop hl                      ; hl = after (
+    push bc                     ; (sp) = after )
+    push hl                     ; (sp) = start (sp+2) = end+1
+    jp (iy)                     ; interp ) after NEXT
+    
+rparen:
+again:    
+    pop bc                      ; IP = start
+    push bc                     ; (sp) = ) (sp+2) = (    
+    inc bc                      ; IP = one after (
     jp (iy)
+    
+comment:
+    inc BC                      ; point to next char
+    ld A,(BC)
+    CP "\r"                     ; terminate at cr 
+    jr NZ,comment
+    dec BC
+    jp   (iy) 
 
-arrEnd:                       
-    ld (vTemp1),bc              ; save IP
-    call rpop
-    ld (vTemp2),hl              ; save old SP
-    ld de,hl                    ; de = hl = old SP
-    or a 
-    sbc hl,sp                   ; hl = array count (items on stack)
-    srl h                       ; num items = num bytes / 2
-    rr l                        
-    ld bc,hl                    ; bc = count
-    ld hl,(vHeapPtr)            ; hl = array[-4]
-    ld (hl),c                   ; write num items in length word
-    inc hl
-    ld (hl),b
-    inc hl                      ; hl = array[0], bc = count
-                                ; de = old SP, hl = array[0], bc = count
-    jr arrayEnd2
-arrayEnd1:                        
-    dec bc                      ; dec items count
-    dec de
-    dec de
-    ld a,(de)                   ; a = lsb of stack item
-    ld (hl),a                   ; write lsb of array item
-    inc hl                      ; move to msb of array item
-    ld a,(vByteMode)            ; vByteMode=1? 
-    dec a
-    jr z,arrayEnd2
-    inc de
-    ld a,(de)                   ; a = msb of stack item
-    dec de
-    ld (hl),a                   ; write msb of array item
-    inc hl                      ; move to next word in array
-arrayEnd2:
-    ld a,c                      ; if not zero loop
-    or b
-    jr nz,arrayEnd1
-    ex de,hl                    ; de = end of array 
-    ld hl,(vTemp2)
-    ld sp,hl                    ; SP = old SP
-    ld hl,(vHeapPtr)            ; de = array[-2]
-    inc hl
-    inc hl
-    push hl                     ; return array[0]
-    ld (vHeapPtr),de            ; move heap* to end of array
-    ld bc,(vTemp1)              ; restore IP
-    jp (iy)
-
-; hex continued
-hex2:
-    SUB $30                     ; Form decimal digit
-    jp C,num2
-    CP $0F+1
-    jp NC,num2
-    add hl,hl                   ; 2X ; Multiply digit(s) in hl by 16
-    add hl,hl                   ; 4X
-    add hl,hl                   ; 8X
-    add hl,hl                   ; 16X     
-    add A,L                     ; add into bottom of hl
-    ld  L,A                     ;   
-    jp  hex1
-
-
-
+    
