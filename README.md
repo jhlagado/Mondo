@@ -122,20 +122,20 @@ some fundamental operator that help you manage the stack
 
 ### <a name='duplicate'></a>Duplicate
 
-The `"` or "dup" operator _duplicates_ the top element of the stack.
+The `#` or "dup" operator _duplicates_ the top element of the stack.
 
 ```
-10 " . .
+10 # . .
 ```
 
 The code prints `10 10`
 
 ### <a name='drop'></a>Drop
 
-The `'` or "drop" removes the top element of the stack.
+The `_` or "drop" removes the top element of the stack.
 
 ```
-20 30 ' .
+20 30 _ .
 ```
 
 The code prints `20`
@@ -160,17 +160,6 @@ places it on top.
 ```
 
 The code prints `70 60 70`
-
-### <a name='rotate'></a>Rotate
-
-The `~` or "rotate" operator rotates the top three elements of the stack, bringing
-the third element to the top.
-
-```
-80 90 100 rot . . .
-```
-
-The code prints `100 80 90`
 
 ## <a name='basic-arithmetic-operations'></a>Basic arithmetic operations
 
@@ -220,6 +209,7 @@ Mondo has a set of bitwise logical operators that can be used to manipulate bits
 & performs a bitwise AND operation on the two operands.
 | performs a bitwise OR operation on the two operands.
 ^ performs a bitwise XOR operation on the two operands.
+~ performs a bitwise NOT on one operand.
 { shifts the bits of the operand to the left by one.
 } shifts the bits of the operand to the right by one.
 ```
@@ -249,10 +239,16 @@ Shift 1 three times to the left (i.e. multiple by 8) and then OR 1 with the leas
 
 prints 0009
 
-Shift 1 two times to the left (i.e. multiple by 4) and then XOR #000F and then mask with #000F.
+Shift 1 two times to the left (i.e. multiple by 4) and then XOR '000F and then mask with '000F.
 
 ```
-1 {{ #F ^ #F & ,
+1 {{ 'F ^ 'F & ,
+```
+
+The following inverts 'FFFF and prints 0
+
+```
+'FFFF ~ .
 ```
 
 prints 000B
@@ -272,11 +268,10 @@ To assign the value `10` to the global variable `x` use the `!` operator.
 
 In this example, the number `10` is assigned to the variable `x`
 
-To access a value in a variable `x`, use the `@` operator.
 The code below adds `3` to the value stored in variable `x` and then prints it.
 
 ```
-3 x@ + .
+3 x + .
 ```
 
 The following code assigns the hexadecimal number `#3FFF` to variable `a`
@@ -284,7 +279,7 @@ The second line fetches the value stored in `a` and prints it.
 
 ```
 #3FFF a !
-a@ .
+a .
 ```
 
 In this longer example, the number 10 is stored in `a` and the number `20` is
@@ -294,8 +289,8 @@ stored in `b`. The values in these two variables are then added together and the
 ```
 10 a !
 20 b !
-a@ b@ + z !
-z@ .
+a b + z !
+z .
 ```
 
 ## <a name='arrays'></a>Arrays
@@ -335,12 +330,12 @@ These can then be allocated to a variable, which acts as a pointer to the array 
 [ 1 2 3 4 5 6 7 8 9 0 ] a !
 ```
 
-To fetch the Nth member of the array, we can create use the index operator `_`
+To fetch the Nth member of the array, we can create use the index operator `@`
 
 The following prints the item at index 2 (which is 3).
 
 ```
-[ 1 2 3 ] 2_ @ .
+[ 1 2 3 ] 2@  .
 ```
 
 ### <a name='array-size'></a>Array size
@@ -359,36 +354,11 @@ The following prints 5 on the console.
 In Mondo arrays can be nested inside one another.
 
 The following code shows an array with another array as its second item.
-This code accesses the second item of the first array with `1_ @`. It then accesses
-the first item of the inner array with `0_ @` and prints the result (which is 2).
+This code accesses the second item of the first array with `1@ `. It then accesses
+the first item of the inner array with `0@ ` and prints the result (which is 2).
 
 ```
-[1 [2 3]] 1_ @ 0_ @ .
-```
-
-### <a name='byte-arrays'></a>Byte arrays
-
-Mondo by default declares arrays of 16 bit words however it is also possible to declare
-and array of 8 bit byte values using `\[`
-
-```
-\[1 2 3]
-```
-
-The size of a byte array can be determined with the `\S` operator.
-The following code prints 3.
-
-```
-\[1 2 3]\S .
-```
-
-A byte value can be read from an address with `\@` however to access an item in a byte array
-use `+` instead of `_` to get the address of the indexed item.
-
-The following prints 2
-
-```
-\[1 2 3] 1+ \@ .
+[1 [2 3]] 1@  0@  .
 ```
 
 ## <a name='loops'></a>Loops
@@ -406,7 +376,9 @@ is ten it will be repeated ten times. If the number is -1 then the loop will rep
 0(this code will not be executed but skipped)
 1(this code will be execute once)
 10(this code will execute 10 times)
--1(this code will be execute forever)
+/F(this code will not be executed but skipped)
+/T(this code will be execute once)
+-2(this code will be execute forever)
 ```
 
 This code following prints ten x's.
@@ -419,7 +391,7 @@ The following code repeats ten times and adds 1 to the variable `t` each time.
 When the loop ends it prints the value of t which is 10.
 
 ```
-0t! 10( t@ 1+ t! ) t@ .
+0t! 10( t 1+ t! ) t .
 ```
 
 Mondo provides a special variable `\i` which acts as a loop counter. The counter counts up from zero. Just before the
@@ -428,7 +400,7 @@ counter reaches the limit number it terminates.
 This prints the numbers 0 to 9.
 
 ```
-10 ( \i@ . )
+10 ( \i . )
 ```
 
 Loops can also be terminated early with the conditional break operator `\B`
@@ -440,7 +412,7 @@ Otherwise it accesses `t` and adds 1 to it.
 Finally when the loop ends it prints the value of t which is 5.
 
 ```
-0t! 10(\i@ 4 > \B \i@ t@ 1+ t!) t@ .
+0t! 10(\i 4 > \B \i t 1+ t!) t .
 ```
 
 Loops can be nested and then special `\j` variable is provided to access the counter of the outer loop.
@@ -449,7 +421,7 @@ The following has two nested loops with limits of 2. The two counter variables a
 When the loop ends `t` prints 4.
 
 ```
-0t! 2(2(\i@ \j@ + t@ + t! )) t@ .
+0t! 2(2(\i \j + t + t! )) t .
 ```
 
 ## <a name='conditional-code'></a>Conditional code
@@ -457,21 +429,27 @@ When the loop ends `t` prints 4.
 Mondo's looping mechanism can also be used to execute code conditionally. In Mondo boolean `false` is represented
 by 0 and `true` is represented by 1.
 
+```
+/F(this code will not be executed but skipped)
+/T(this code will be execute once)
+```
+
+
 The following tests if `x` is less that 5.
 
 ```
 3 x!
-x@ 5 < (`true`)
+x 5 < (`true`)
 ```
 
-The syntax for a Mondo IF-THEN-ELSE or "if...else" operator in Mondo is and extension of the loop syntax.
+The syntax for a Mondo IF-THEN-ELSE or "if...else" operator in Mondo is and 
+extension of the loop syntax.
 
 ```
-boolean (code-block-then)(code-block-else)
+boolean (code-block-then)$$(code-block-else)
 ```
 
 If the condition is true, then code-block-then is executed. Otherwise, code-block-else is executed.
-The only syntax rule is that the code-block-else follows the code-block-then block with no spaces between.
 
 Here is an example of a "if...else" operator in Mondo:
 
@@ -479,7 +457,7 @@ Here is an example of a "if...else" operator in Mondo:
 10 x !
 20 y !
 
-x@ y@ > ( `x is greater than y` )( `y is greater than x` )
+x y > ( `x is greater than y` )$$( `y is greater than x` )
 
 ```
 
@@ -493,7 +471,7 @@ code conditionally prints text straight to the console.
 ```
 18 a !
 
-`This person` a@ 17 > (`can`)(`cannot`) `vote`
+`This person` a 17 > (`can`)$$(`cannot`) `vote`
 ```
 
 In this example, the variable a is assigned the value 18. The "if...else" operator
@@ -592,7 +570,7 @@ The function adds 1 and prints 4 to the console.
 
 ```
 \: 1+ ; a!
-3 a@ \G .
+3 a \G .
 ```
 
 Anonymous functions can be stored in arrays and can even be used as a kind of "switch" statement.
@@ -601,7 +579,7 @@ index 2 and runs it. "two" is printed to the console.
 
 ```
 [\: `zero` ; \: `one` ; \: `two` ;] b!
-b@ 2_@ \G
+b 2@ \G
 ```
 
 ## <a name='appendices'></a>Appendices
@@ -636,20 +614,18 @@ commands from the keyboard.
 | &      | 16-bit bitwise AND   | a b -- c |
 | \|     | 16-bit bitwise OR    | a b -- c |
 | ^      | 16-bit bitwise XOR   | a b -- c |
-| {      | shift left           | --       |
-| }      | shift right          | --       |
-
-Note: logical NOT can be achieved with 0=
+| ~      | 16-bit bitwise NOT   | a -- c   |
+| /L     | shift left           | val num --       |
+| /R     | shift right          | val num --       |
 
 ### <a name='stack-operations'></a>Stack Operations
 
 | Symbol | Description                                                          | Effect         |
 | ------ | -------------------------------------------------------------------- | -------------- |
-| '      | drop the top member of the stack DROP                                | a a -- a       |
-| "      | duplicate the top member of the stack DUP                            | a -- a a       |
-| ~      | rotate the top 3 members of the stack ROT                            | a b c -- b c a |
-| %      | over - take the 2nd member of the stack and copy to top of the stack | a b -- a b a   |
+| _      | drop the top member of the stack DROP                                | a a -- a       |
+| #      | duplicate the top member of the stack DUP                            | a -- a a       |
 | $      | swap the top 2 members of the stack SWAP                             | a b -- b a     |
+| %      | over - take the 2nd member of the stack and copy to top of the stack | a b -- a b a   |
 | \D     | stack depth                                                          | -- val         |
 
 ### <a name='input-&-output-operations'></a>Input & Output Operations
@@ -660,18 +636,19 @@ Note: logical NOT can be achieved with 0=
 | .      | print the number on the stack as a decimal     | a --        |
 | ,      | print the number on the stack as a hexadecimal | a --        |
 | \`     | print the literal string between \` and \`     | --          |
-| \\E    | prints a character to output                   | val --      |
-| \\O    | output to an I/O port                          | val port -- |
-| \\I    | input from a I/O port                          | port -- val |
-| #      | the following number is in hexadecimal         | a --        |
+| /E     | prints a character to output                   | val --      |
+| /O     | output to an I/O port                          | val port -- |
+| /I     | input from a I/O port                          | port -- val |
+| '      | the following number is in hexadecimal         | a --        |
+| /H     | toggle hex mode                                | -- |
 
 | Symbol  | Description                     | Effect   |
 | ------- | ------------------------------- | -------- |
 | ;       | end of user definition END      |          |
 | :<CHAR> | define a new command DEF        |          |
-| \\:     | define an anonymous command DEF | -- adr   |
-| \\G     | execute Mondo code at address   | adr -- ? |
-| \\X     | execute machine code at address | adr -- ? |
+| /:     | define an anonymous command DEF | -- adr   |
+| /G     | execute Mondo code at address   | adr -- ? |
+| /X     | execute machine code at address | adr -- ? |
 
 NOTE:
 <CHAR> is an uppercase letter immediately following operation which is the name of the definition
@@ -682,7 +659,9 @@ NOTE:
 | ------ | -------------------------------------- | ------ |
 | (      | BEGIN a loop which will repeat n times | n --   |
 | )      | END a loop code block                  | --     |
-| \\B    | if false break out of loop             | b --   |
+| /W     | if false break out of loop             | b --   |
+| $$     | else comdition                         | --     |
+
 
 NOTE 1: a loop with a boolean value for a loop limit (i.e. 0 or 1) is a conditionally executed block of code
 
@@ -695,8 +674,8 @@ NOTE 2: if you _immediately_ follow a code block with another code block, this s
 the "else" condition.
 
 ```
-0(`will not execute`)(`will execute`)
-1(`will execute`)(`will not execute`)
+0(`will not execute`)$$(`will execute`)
+1(`will execute`)$$(`will not execute`)
 ```
 
 ### <a name='memory-and-variable-operations'></a>Memory and Variable Operations
@@ -704,9 +683,7 @@ the "else" condition.
 | Symbol | Description               | Effect     |
 | ------ | ------------------------- | ---------- |
 | !      | STORE a value to memory   | val adr -- |
-| @      | FETCH a value from memory | adr -- val |
-| \\!    | STORE a byte to memory    | val adr -- |
-| \\@    | FETCH a byte from memory  | -- val     |
+| /B     | toggle byte mode          | --         |
 
 ### <a name='array-operations'></a>Array Operations
 
@@ -714,36 +691,36 @@ the "else" condition.
 | ------ | ----------------------------- | -------------- |
 | [      | begin an array definition     | --             |
 | ]      | end an array definition       | -- adr         |
-| \_     | get address of array item     | adr idx -- adr |
-| \\S    | array size                    | adr -- val     |
-| \\[    | begin a byte array definition | --             |
+| \@     | get address of array item     | adr idx -- adr |
+| /S    | array size                    | adr -- val     |
+| /[    | begin a byte array definition | --             |
 
 ### <a name='system-variables-1'></a>System Variables
 
 | Symbol | Description                        | Effect |
 | ------ | ---------------------------------- | ------ |
-| \\a    | data stack start variable          | -- adr |
-| \\c    | carry flag variable                | -- adr |
-| \\d    | start of user definitions          | -- adr |
-| \\h    | heap pointer variable              | -- adr |
-| \\i    | loop counter variable              | -- adr |
-| \\j    | outer loop counter variable        | -- adr |
-| \\t    | text input buffer pointer variable | -- adr |
+| /a    | data stack start variable          | -- adr |
+| /c    | carry flag variable                | -- adr |
+| /d    | start of user definitions          | -- adr |
+| /h    | heap pointer variable              | -- adr |
+| /i    | loop counter variable              | -- adr |
+| /j    | outer loop counter variable        | -- adr |
+| /t    | text input buffer pointer variable | -- adr |
 
 ### <a name='miscellaneous'></a>Miscellaneous
 
 | Symbol | Description                                   | Effect |
 | ------ | --------------------------------------------- | ------ |
-| \\\\   | comment text, skips reading until end of line | --     |
+| /\\   | comment text, skips reading until end of line | --     |
 
 ### <a name='utility-commands'></a>Utility commands
 
 | Symbol | Description   | Effect  |
 | ------ | ------------- | ------- |
-| \\N    | prints a CRLF | --      |
-| \\L    | edit command  | char -- |
-| \\P    | print prompt  | --      |
-| \\T    | print stack   | --      |
+| /UN    | prints a CRLF | --      |
+| /UE    | edit command  | char -- |
+| /UP    | print prompt  | --      |
+| /US    | print stack   | --      |
 
 ### <a name='control-keys'></a>Control keys
 

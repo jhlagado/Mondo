@@ -110,16 +110,16 @@ iOpcodes:
 iAltcodes:
     LITDAT 24
     db     lsb(aNop_)       ;A
-    db     lsb(bmode_)      ;B      byte mode
+    db     lsb(bmode_)      ;B      toggle byte mode
     db     lsb(aNop_)       ;C
     db     lsb(aNop_)       ;D      
     db     lsb(emit_)       ;E      emit a char
     db     lsb(false_)      ;F      false
     db     lsb(go_)         ;G      execute Mondo code
-    db     lsb(hmode_)      ;H      hex mode
+    db     lsb(hmode_)      ;H      toggle hex mode
     db     lsb(inPort_)     ;I      input from port
     db     lsb(loopJ_)      ;J      loop variable    
-    db     lsb(key_)        ;K
+    db     lsb(key_)        ;K      input char
     db     lsb(shl_)        ;L
     db     lsb(aNop_)       ;M
     db     lsb(newln_)      ;N      prints a newline to output
@@ -1030,8 +1030,7 @@ inPort_:			    ; \<
     jp (iy)        
 
 loopJ_:
-    ld hl,(vLoopSP)
-    push hl
+    push ix
     jp (IY)
 
 newln_:
@@ -1337,54 +1336,3 @@ loopEnd4:
 ; 2 3 limit
 ; 4 5 start
 ; 6 7 end
-;
-; begin:
-; loopStart:
-;     pop hl                      ; hl = condition
-;     ld a,l                      ; if false skip to end
-;     or h
-;     jr z, loopStart2           
-;     inc hl
-;     ld a,l                      ; if false skip to end
-;     or h
-;     dec hl
-;     jr nz, loopStart1           
-;     inc hl
-;     inc hl
-; loopStart1:    
-;     push hl                     ; push condition
-;     ld hl,bc                    ; rpush start
-;     call rpush                  ; rpush start
-;     jp (iy)
-
-; loopStart2:
-;     jp (iy)
-
-; again:
-; loopEnd:    
-;     call rpop                   ; IP = rpeek start
-;     ld bc,hl
-;     jp (iy)
-
-; lparen:
-; loopStart:                          
-;     push bc                     ; save IP
-;     ld e,1                      ; skip to loop end, nesting = 1
-; loopStart2:
-;     inc bc
-;     ld a,(bc)
-;     call nesting
-;     xor A
-;     or E
-;     jr nz,loopStart2
-;     pop hl                      ; hl = after (
-;     push bc                     ; (sp) = after )
-;     push hl                     ; (sp) = start (sp+2) = end+1
-;     jp (iy)                     ; interp ) after NexT
-    
-; rparen:
-; loopEnd:    
-;     pop bc                      ; IP = start
-;     push bc                     ; (sp) = ) (sp+2) = (    
-;     inc bc                      ; IP = one after (
-;     jp (iy)
