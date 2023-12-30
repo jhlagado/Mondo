@@ -47,10 +47,10 @@ PUTCVEC:    DS 2                ;
             DS 26*2
 altVars:
 
-vS0:        DS 2                ; a
-vBase16:    DS 2                ; b
+            DS 2                ; a
+vByteMode:  DS 2                ; b
 vCarry:     DS 2                ; c
-vByteMode:  DS 2                ; d
+            DS 2                ; d
 vLastDef:   DS 2                ; e
             DS 2                ; f
             DS 2                ; g
@@ -64,17 +64,16 @@ vHeapPtr:   DS 2                ; h
             DS 2                ; o
 vPointer:   DS 2                ; p
             DS 2                ; q
-            DS 2                ; r     
-            DS 2                ; s
+vRemain:    DS 2                ; r     
+vS0:        DS 2                ; s
 vTIBPtr:    DS 2                ; t
             DS 2                ; u
             DS 2                ; v
             DS 2                ; w
-            DS 2                ; x     
+vHexMode:   DS 2                ; x     
             DS 2                ; y
             DS 2                ; z
 
-            ; .align $40
 VARS:   DS VARS_SIZE
 
 HEAP:         

@@ -1,32 +1,40 @@
 STACK
 Opcode	Stack	Description
 
-#	(a--a a)	Duplicate TOS (DUP)
-_	(a b--a)	Drop TOS (DROP)
+" -> #	(a--a a)	Duplicate TOS (DUP)
+' -> _	(a b--a)	Drop TOS (DROP)
 $	(a b--b a)	Swap top 2 stack items (SWAP)
 %	(a b--a b a)	Push 2nd (OVER)
-@ access
 
-~   not
+_ -> @ access
 
+!!!!! ~   not
+
+\ -> /
 / div
-// comment
-/CHAR command or var
-/K read key
-' hex (temporary)
+\\ -> // comment
+\CHAR -> /CHAR command or var
+? -> /K read key
 
-/h heap
-/b byte mode
-/d decimal mode (default true)
+# -> ' hex literal (temporary)
+
+\d -> /b byte mode
 
 booleans 0, 'FFFF
 
-? : ;       ternary
-_ could be drop ... 
 
-negate? not needed?
-_	(a--b)	b: -a (Negate)
-
+( /W ) loops
 
 reserve \ for
 \abc .... ;   lambda ????
+
+
+conditionals
+? : ;       ternary
+
+/B
+/W !!!! used for while
+/H
+/D
+
+
