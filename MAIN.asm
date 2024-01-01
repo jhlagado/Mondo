@@ -116,7 +116,7 @@ iAltcodes:
     db     lsb(emit_)       ;E      emit a char
     db     lsb(aNop_)       ;F      false
     db     lsb(go_)         ;G      execute Mondo code
-    db     lsb(Nop_)        ;H      toggle hex mode
+    db     lsb(aNop_)       ;H      toggle hex mode
     db     lsb(inPort_)     ;I      input from port
     db     lsb(aNop_)       ;J      loop variable    
     db     lsb(key_)        ;K      input char
@@ -333,7 +333,7 @@ lookup:
     sub "A"
     jr lookup2 
 lookup1:
-    sub "a" - 26*2
+    sub "a" - 26
 lookup2:
     add A,A
     ld hl,VARS
@@ -514,12 +514,11 @@ loopVar:
     .align $100
 page4:
 
-bslash_:
 dquote_:        
 question_:
 lbrace_:   
 rbrace_:   
-nop_: 
+underscore_: 
     jp (iy)
 
 amper_:        
@@ -589,7 +588,7 @@ hdot_:
     call printhex
     jr   dot2
 
-underscore_: 
+bslash_:
 drop_:
     pop     hl
     jp (iy)
@@ -783,7 +782,7 @@ slash:
     ld e,0
     jp z,loopVar
     cp "j"
-    ld e,6
+    ld e,8
     jp z,loopVar
     sub "a" 
     add A,A
@@ -1112,9 +1111,8 @@ utility1:
     jr nz,utility3
 utility2:    
 ; printStk:                           
-    ; Mondo: \a@2- \- 1- ("@ \b@ \(,)(.) 2-) '             
     call ENTER
-    .cstr "`=> `/s2-/UD1-(#,2-)_/N"             
+    .cstr "`=> `/s2-/UD1-(#,2-)\\/N"             
 utility3:
     jp (iy)
 
