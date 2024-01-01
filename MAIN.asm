@@ -500,12 +500,10 @@ enter:
     jp (iy)                    
 
 loopVar:    
-    ld a,e
-    add a,ixl
-    ld l,a
-    ld a,0
-    adc a,ixh
-    ld h,a
+    ld h,0
+    ld d,ixh
+    ld e,ixl
+    add hl,de
     jp var1
 
 ; **********************************************************************			 
@@ -779,10 +777,10 @@ slash:
     cp "z"+1
     jr nc,alt2
     cp "i"
-    ld e,0
+    ld l,0
     jp z,loopVar
     cp "j"
-    ld e,8
+    ld l,8
     jp z,loopVar
     sub "a" 
     add A,A
