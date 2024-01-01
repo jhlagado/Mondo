@@ -17,9 +17,10 @@ Mondo is a minimalist character-based interpreter but one which aims at fast per
   - [Swap](#swap)
   - [Over](#over)
   - [Rotate](#rotate)
+- [Variables](#variables)
+- [System variables](#system-variables)
 - [Basic arithmetic operations](#basic-arithmetic-operations)
 - [Logical operators](#logical-operators)
-- [Variables](#variables)
 - [Arrays](#arrays)
   - [Basic arrays](#basic-arrays)
   - [Array size](#array-size)
@@ -130,12 +131,12 @@ The following code prints `10 10`
 
 ### <a name='drop'></a>Drop
 
-The `_` or "drop" removes the top element of the stack.
+The `\` or "drop" removes the top element of the stack.
 
 The following code prints `20`
 
 ```
-20 30 _ .
+20 30 \ .
 ```
 
 ### <a name='swap'></a>Swap
@@ -158,6 +159,50 @@ The following code prints `60 70 60`
 ```
 60 70 % . . .
 ```
+
+## <a name='variables'></a>Variables
+
+Variables are named locations in memory that can store data. Mondo has a limited
+number of global variables which have single letter names. In Mondo a variable can
+be referred to by a singer letter from `a` to `z` so there are 26
+global variables in Mondo. Global variables can be used to store numbers, strings, arrays, blocks, functions etc.
+
+To assign the value `10` to the global variable `x` use the `!` operator.
+
+```
+10 x !
+```
+
+In this example, the number `10` is assigned to the variable `x`
+
+The code below adds `3` to the value stored in variable `x` and then prints it.
+
+```
+3 x + .
+```
+
+The following code assigns the hexadecimal number `'3FFF` to variable `a`
+The second line fetches the value stored in `a` and prints it.
+
+```
+'3FFF a !
+a .
+```
+
+In this longer example, the number 10 is stored in `a` and the number `20` is
+stored in `b`. The values in these two variables are then added together and the answer
+`30` is stored in `z`. Finally `z` is printed.
+
+```
+10 a !
+20 b !
+a b + z !
+z .
+```
+
+## <a name='system-variables'></a>System variables
+
+In addition to the 26 general purpose variables, Mondo has a 26 system variables which have special uses. System variables start with a `/` followed by a lowercase character.
 
 ## <a name='basic-arithmetic-operations'></a>Basic arithmetic operations
 
@@ -259,46 +304,6 @@ The following inverts 'FFFF and prints 0
 ```
 
 prints 000B
-
-## <a name='variables'></a>Variables
-
-Variables are named locations in memory that can store data. Mondo has a limited
-number of global variables which have single letter names. In Mondo a variable can
-be referred to by a singer letter from `a` to `z` so there are 26
-global variables in Mondo. Global variables can be used to store numbers, strings, arrays, blocks, functions etc.
-
-To assign the value `10` to the global variable `x` use the `!` operator.
-
-```
-10 x !
-```
-
-In this example, the number `10` is assigned to the variable `x`
-
-The code below adds `3` to the value stored in variable `x` and then prints it.
-
-```
-3 x + .
-```
-
-The following code assigns the hexadecimal number `'3FFF` to variable `a`
-The second line fetches the value stored in `a` and prints it.
-
-```
-'3FFF a !
-a .
-```
-
-In this longer example, the number 10 is stored in `a` and the number `20` is
-stored in `b`. The values in these two variables are then added together and the answer
-`30` is stored in `z`. Finally `z` is printed.
-
-```
-10 a !
-20 b !
-a b + z !
-z .
-```
 
 ## <a name='arrays'></a>Arrays
 
@@ -612,41 +617,40 @@ commands from the keyboard.
 
 ### <a name='logical-operators-1'></a>Logical Operators
 
-| Symbol | Description          | Effect     |
-| ------ | -------------------- | ---------- |
-| \>     | 16-bit comparison GT | a b -- c   |
-| <      | 16-bit comparison LT | a b -- c   |
-| =      | 16 bit comparison EQ | a b -- c   |
-| &      | 16-bit bitwise AND   | a b -- c   |
-| \|     | 16-bit bitwise OR    | a b -- c   |
-| ^      | 16-bit bitwise XOR   | a b -- c   |
-| ~      | 16-bit bitwise NOT   | a -- c     |
-| /L     | shift left           | val num -- |
-| /R     | shift right          | val num -- |
+| Symbol | Description          | Effect   |
+| ------ | -------------------- | -------- |
+| \>     | 16-bit comparison GT | a b -- c |
+| <      | 16-bit comparison LT | a b -- c |
+| =      | 16 bit comparison EQ | a b -- c |
+| &      | 16-bit bitwise AND   | a b -- c |
+| \|     | 16-bit bitwise OR    | a b -- c |
+| ^      | 16-bit bitwise XOR   | a b -- c |
+| ~      | 16-bit bitwise NOT   | a -- c   |
+| /L     | shift left           | n n --   |
+| /R     | shift right          | n n --   |
 
 ### <a name='stack-operations'></a>Stack Operations
 
 | Symbol | Description                                                          | Effect       |
 | ------ | -------------------------------------------------------------------- | ------------ |
-| \_     | drop the top member of the stack DROP                                | a a -- a     |
+| \\     | drop the top member of the stack DROP                                | a a -- a     |
 | #      | duplicate the top member of the stack DUP                            | a -- a a     |
 | $      | swap the top 2 members of the stack SWAP                             | a b -- b a   |
 | %      | over - take the 2nd member of the stack and copy to top of the stack | a b -- a b a |
-| /D     | stack depth                                                          | -- val       |
+| /D     | stack depth                                                          | -- n         |
 
 ### <a name='input-&-output-operations'></a>Input & Output Operations
 
-| Symbol | Description                                    | Effect      |
-| ------ | ---------------------------------------------- | ----------- |
-| ?      | read a char from input                         | -- val      |
-| .      | print the number on the stack as a decimal     | a --        |
-| ,      | print the number on the stack as a hexadecimal | a --        |
-| \`     | print the literal string between \` and \`     | --          |
-| /E     | prints a character to output                   | val --      |
-| /O     | output to an I/O port                          | val port -- |
-| /I     | input from a I/O port                          | port -- val |
-| '      | the following number is in hexadecimal         | a --        |
-| /H     | toggle hex mode                                | --          |
+| Symbol | Description                                    | Effect |
+| ------ | ---------------------------------------------- | ------ |
+| ?      | read a char from input                         | -- c   |
+| .      | print the number on the stack as a decimal     | a --   |
+| ,      | print the number on the stack as a hexadecimal | a --   |
+| \`     | print the literal string between \` and \`     | --     |
+| /E     | prints a character to output                   | n --   |
+| /O     | output to an I/O port                          | n p -- |
+| /I     | input from a I/O port                          | p -- n |
+| '      | the following number is in hexadecimal         | a --   |
 
 | Symbol  | Description                     | Effect   |
 | ------- | ------------------------------- | -------- |
@@ -666,7 +670,9 @@ NOTE:
 | (      | BEGIN a loop which will repeat n times | n --   |
 | )      | END a loop code block                  | --     |
 | /W     | if false break out of loop             | b --   |
-| /e     | else comdition                         | --     |
+| /e     | else condition                         | -- b   |
+| /i     | loop counter variable                  | -- n   |
+| /j     | outer loop counter variable            | -- n   |
 
 NOTE 1: a loop with a boolean value for a loop limit (i.e. 0 or 1) is a conditionally executed block of code
 
@@ -675,8 +681,7 @@ NOTE 1: a loop with a boolean value for a loop limit (i.e. 0 or 1) is a conditio
 1(`will execute`)
 ```
 
-NOTE 2: if you _immediately_ follow a code block with another code block, this second code block will execute
-the "else" condition.
+NOTE 2: if you follow a code block with `/e` followed by another code block, this second code block will execute the "else" condition.
 
 ```
 0(`will not execute`) /e (`will execute`)
@@ -685,10 +690,10 @@ the "else" condition.
 
 ### <a name='memory-and-variable-operations'></a>Memory and Variable Operations
 
-| Symbol | Description             | Effect     |
-| ------ | ----------------------- | ---------- |
-| !      | STORE a value to memory | val adr -- |
-| /B     | toggle byte mode        | --         |
+| Symbol | Description             | Effect   |
+| ------ | ----------------------- | -------- |
+| !      | STORE a value to memory | n adr -- |
+| /B     | toggle byte mode        | --       |
 
 ### <a name='array-operations'></a>Array Operations
 
@@ -697,19 +702,25 @@ the "else" condition.
 | [      | begin an array definition | --             |
 | ]      | end an array definition   | -- adr         |
 | @      | get address of array item | adr idx -- adr |
-| /S     | array size                | adr -- val     |
+| /S     | array size                | adr -- n       |
 
 ### <a name='system-variables-1'></a>System Variables
 
-| Symbol | Description                        | Effect |
-| ------ | ---------------------------------- | ------ |
-| /a     | data stack start variable          | -- adr |
-| /c     | carry flag variable                | -- adr |
-| /d     | start of user definitions          | -- adr |
-| /h     | heap pointer variable              | -- adr |
-| /i     | loop counter variable              | -- adr |
-| /j     | outer loop counter variable        | -- adr |
-| /t     | text input buffer pointer variable | -- adr |
+| Symbol | Description               | Effect  |
+| ------ | ------------------------- | ------- |
+| /c     | carry flag variable       | -- b    |
+| /e     | else condition            | -- b    |
+| /f     | false                     | -- b    |
+| /h     | heap pointer              | -- adr  |
+| /i     | loop counter              | -- n    |
+| /j     | outer loop counter        | -- n    |
+| /k     | text input buffer pointer | -- adr  |
+| /p     | last access pointer       | -- adr  |
+| /r     | last division remainder   | -- adr  |
+| /s     | data stack start          | -- adr  |
+| /t     | true                      | -- b    |
+| /u     | unlimited loop            | -- n    |
+| /z     | last definition           | -- char |
 
 ### <a name='miscellaneous'></a>Miscellaneous
 
