@@ -10,7 +10,7 @@
     JR Z,expect%%M
 
     CALL printStr
-    .cstr msg1,"\r\nActual: "
+    .cstr "\r\n\r\n",msg1,"\r\nActual: "
     CALL printdec
 
     CALL printStr

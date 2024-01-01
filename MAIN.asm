@@ -9,16 +9,16 @@
 ;       see the LIcENSE file in this repo for more information 
 ;
 ; *****************************************************************************
-    TRUE        EQU $FFFF	; not FF, for Mondo
     FALSE       EQU 0
-    EMPTY       EQU 0		; for an empty macro, ctrl-<something>=macro, ie ctrl-h = backspace macros (in Mondo)
+    TRUE        EQU -1	
+    UNLIMITED   EQU -2		; for endless loops
 
-    cTRL_c      equ 3
-    cTRL_E      equ 5
-    cTRL_H      equ 8
-    cTRL_J      equ 10
-    cTRL_L      equ 12
-    cTRL_P      equ 16
+    cTRL_C      equ 3       ; end of text
+    cTRL_E      equ 5       ; edit
+    cTRL_H      equ 8       ; backspace
+    cTRL_J      equ 10      ; re-edit
+    cTRL_L      equ 12      ; list
+    cTRL_P      equ 16      ; print stack
 
     BSLASH      equ $5c
 
@@ -49,16 +49,16 @@
 macros:
 
 reedit_:
-    db "/e/UE;"			; remembers last line edited
+    db "/z/UE;"			; remembers last line edited
 
 edit_:
-    .cstr "`?`?/UP/UE;"
+    .cstr "`?`/K/UP/UE;"
 
 list_:
-    ; .cstr "/N26(/i@65+/UE/t@0>(/N))/UP;"
+    ; .cstr "/N26(/i65+/UE/k0>(/N))/UP;"
 
 printStack_:
-    .cstr "\\US\\UP;"        
+    .cstr "/US/UP;"        
 
 iOpcodes:
     LITDAT 15
@@ -114,11 +114,11 @@ iAltcodes:
     db     lsb(aNop_)       ;C
     db     lsb(aNop_)       ;D      
     db     lsb(emit_)       ;E      emit a char
-    db     lsb(false_)      ;F      false
+    db     lsb(aNop_)       ;F      false
     db     lsb(go_)         ;G      execute Mondo code
-    db     lsb(hmode_)      ;H      toggle hex mode
+    db     lsb(Nop_)        ;H      toggle hex mode
     db     lsb(inPort_)     ;I      input from port
-    db     lsb(loopJ_)      ;J      loop variable    
+    db     lsb(aNop_)       ;J      loop variable    
     db     lsb(key_)        ;K      input char
     db     lsb(shl_)        ;L
     db     lsb(aNop_)       ;M
@@ -128,7 +128,7 @@ iAltcodes:
     db     lsb(aNop_)       ;Q
     db     lsb(shr_)        ;R
     db     lsb(arrSize_)    ;S      array size
-    db     lsb(true_)       ;T      true
+    db     lsb(aNop_)       ;T      true
     db     lsb(utility_)    ;U      
     db     lsb(aNop_)       ;V      
     db     lsb(while_)      ;W      word mode 
@@ -143,11 +143,11 @@ iAltcodes:
 backSpace:
     ld a,c
     or b
-    jp z, interpret2
+    jr z, interpret2
     dec bc
     call printStr
     .cstr "\b \b"
-    jp interpret2
+    jr interpret2
     
 start:
     ld SP,DSTACK		; start of Mondo
@@ -205,7 +205,7 @@ waitchar:
     jr z,macro
     jr interpret2
 
-macro:                          ;=25
+macro:                          
     ld (vTIBPtr),bc
     push de
     call ENTER		;Mondo go operation and jump to it
@@ -243,7 +243,7 @@ waitchar4:
     ld bc,TIB               ; Instructions stored on heap at address HERe, we pressed enter
     dec bc
 
-NexT:                           ;      
+next:                           ;      
     inc bc                      ;       Increment the IP
     ld a, (bc)                  ;       Get the next character and dispatch
     or a                        ; is it NUL?       
@@ -266,7 +266,7 @@ exit:
     ex de,hl
     jp (hl)
 
-etx:                                ;=12
+etx:                                
     ld hl,-DSTACK               ; check if stack pointer is underwater
     add hl,SP
     jr nc,etx1
@@ -274,11 +274,9 @@ etx:                                ;=12
 etx1:
     jp interpret
 
-init:                           ;=68
-    ld hl,lSTAcK
-    ld (vLoopSP),hl         ; Loop stack pointer stored in memory
-    ld ix,RSTAcK
-    ld iy,NexT		; iy provides a faster jump to NexT
+init:                           
+    ld ix,RSTACK
+    ld iy,NexT		            ; iy provides a faster jump to NexT
 
     ld hl,altVars               ; init altVars to 0 
     ld b,26 * 2
@@ -286,14 +284,17 @@ init1:
     ld (hl),0
     inc hl
     djnz init1
+    ld hl,TRUE                  ; hl = TRUE
+    ld (vTrue),hl
+    dec hl                      ; hl = Unlimited
+    ld (vUnlimited),hl
     ld hl,DSTACK
     ld (vS0),hl
     ld hl,65
     ld (vLastDef),hl
     ld hl,hEAP
     ld (vHeapPtr),hl
-
-    ld hl,VARS              ; init namespaces to 0 using LDIR
+    ld hl,VARS                  ; init namespaces to 0 using LDIR
     ld de,hl
     inc de
     ld (hl),0
@@ -345,7 +346,7 @@ lookup2:
     or E                        ; sets z flag if A-z
     ret
 
-printhex:                           ;=31  
+printhex:                           
                                 ; Display hl as a 16-bit number in hex.
     push bc                     ; preserve the IP
     ld a,h
@@ -370,7 +371,7 @@ printhex3:
 	DAA
 	jp putchar
 
-editDef:                            ;=50 lookup up def based on number
+editDef:                        ; lookup up def based on number
     pop hl                      ; pop ret address
     ex (SP),hl                  ; swap with TOS                  
     ld a,l
@@ -413,19 +414,14 @@ editDef3:
 ; limited to 127 levels
 ; **************************************************************************             
 
-nesting:                        ;=44
+nesting:                        
     cp '`'
     jr nz,nesting1
-    bit 7,E
-    jr z,nesting1a
-    res 7,E
-    ret
-nesting1a: 
-    set 7,E
+    ld a,$80
+    xor e
+    ld e,a
     ret
 nesting1:
-    bit 7,E             
-    ret nz             
     cp ':'
     jr z,nesting2
     cp '['
@@ -450,24 +446,24 @@ nesting4:
     dec E
     ret 
 
-prompt:                             ;=9
+prompt:                             
     call printStr
     .cstr "\r\n> "
     ret
 
-crlf:                               ;=7
+crlf:                               
     call printStr
     .cstr "\r\n"
     ret
 
-printStr:                           ;=7
+printStr:                           
     ex (SP),hl		                ; swap			
     call putStr		
     inc hl			                ; inc past null
     ex (SP),hl		                ; put it back	
     ret
 
-putStr0:                            ;=9
+putStr0:                            
     call putchar
     inc hl
 putStr:
@@ -476,14 +472,14 @@ putStr:
     jr nz,putStr0
     ret
 
-rpush:                              ;=11
+rpush:                              
     dec ix                  
     ld (ix+0),h
     dec ix
     ld (ix+0),l
     ret
 
-rpop:                               ;=11
+rpop:                               
     ld L,(ix+0)         
     inc ix              
     ld H,(ix+0)
@@ -491,18 +487,26 @@ rpop:                               ;=11
 rpop2:
     ret
 
-writechar:                          ;=5
+writechar:                          
     ld (hl),A
     inc hl
     jp putchar
 
-enter:                              ;=9
+enter:                              
     ld hl,bc
     call rpush                      ; save Instruction Pointer
     pop bc
     dec bc
     jp (iy)                    
 
+loopVar:    
+    ld a,e
+    add a,ixl
+    ld l,a
+    ld a,0
+    adc a,ixh
+    ld h,a
+    jp var1
 
 ; **********************************************************************			 
 ; Page 4 primitive routines 
@@ -530,9 +534,9 @@ and_:
 and1:
     ld      H,A         ;   
     push    hl          ;    
-    jp (iy)        ;   
+    jp (iy)             ;   
     
-                        ; 
+                         
 pipe_: 		 
 or_:
     pop     de             ; bitwise or the top 2 elements of the stack
@@ -668,8 +672,17 @@ eq_:
     pop de
     or a               ; reset the carry flag
     sbc hl,de          ; only equality sets hl=0 here
-    jp z,true_
-    jp false_
+    jr z,true_
+false_:
+    ld hl,FALSE
+    push hl
+    jp (iy)
+
+true_:
+    ld hl,TRUE
+    push hl
+    jp (iy)
+
 gt_:    
     pop hl
     pop de
@@ -680,8 +693,8 @@ lt_:
 lt1_:   
     or a                ; reset the carry flag
     sbc hl,de           ; only equality sets hl=0 here
-    jp c,true_
-    jp false_
+    jr c,true_
+    jr false_
 
 var_:
     ld a,(bc)
@@ -757,7 +770,7 @@ slash_:
 ; Page 5 primitive routines 
 ;*******************************************************************
     ;falls through 
-slash:                      ;=11
+slash:                      
     inc bc
     ld a,(bc)
     cp "/"
@@ -766,6 +779,12 @@ slash:                      ;=11
     jr c,alt1
     cp "z"+1
     jr nc,alt2
+    cp "i"
+    ld e,0
+    jp z,loopVar
+    cp "j"
+    ld e,6
+    jp z,loopVar
     sub "a" 
     add A,A
     ld hl,altVars
@@ -795,7 +814,7 @@ hex1:
     inc bc
     ld a,(bc)		    ; Get the character which is a numeral
     bit 6,A                     ; is it uppercase alpha?
-    jp z, hex2                  ; no a decimal
+    jr z, hex2                  ; no a decimal
     SUB 7                       ; sub 7  to make $A - $F
 hex2:
     SUB $30                     ; Form decimal digit
@@ -875,7 +894,7 @@ jumpin:
     sbc hl,bc   ;15
     jr c,loop1  ;23-2b
     inc e       ;--
-    jp Loop2    ;--
+    jr Loop2    ;--
 EndSDiv:
     pop af  
     jp p,div10
@@ -963,23 +982,6 @@ bmode_:
     ld (vByteMode+1),a
     jp (iy)
 
-
-wmode_:
-    ld hl,FALSE
-    ld (vByteMode),hl
-
-false_:
-    ld hl,FALSE
-    push hl
-    jp (iy)
-
-hmode_:
-    ld a,(vHexMode)
-    cpl
-    ld (vHexMode),a
-    ld (vHexMode+1),a
-    jp (iy)
-
 emit_:
     pop hl
     ld a,l
@@ -1029,10 +1031,6 @@ inPort_:			    ; \<
     push hl
     jp (iy)        
 
-loopJ_:
-    push ix
-    jp (IY)
-
 newln_:
     call crlf
     jp (iy)        
@@ -1055,7 +1053,7 @@ shiftLeft:
     push bc                 ; save IP
     ld a,e
     or a
-    jp z,shiftLeft2
+    jr z,shiftLeft2
     ld b,e
 shiftLeft1:   
     add hl,hl               ; left shift hl
@@ -1071,7 +1069,7 @@ shr_:
     push bc                 ; save IP
     ld a,e
     or a
-    jp z,shiftRight2
+    jr z,shiftRight2
     ld b,e
 shiftRight1:   
     srl h
@@ -1080,11 +1078,6 @@ shiftRight1:
 shiftRight2:   
     pop bc
     push hl                 ; restore IP
-    jp (iy)
-
-true_:
-    ld hl,TRUE
-    push hl
     jp (iy)
 
 ;/D -> /UD depth            depth
@@ -1121,7 +1114,7 @@ utility2:
 ; printStk:                           
     ; Mondo: \a@2- \- 1- ("@ \b@ \(,)(.) 2-) '             
     call ENTER
-    .cstr "`=> `/s2-/UD1-(#.2-)_/N"             
+    .cstr "`=> `/s2-/UD1-(#,2-)_/N"             
 utility3:
     jp (iy)
 
@@ -1131,8 +1124,10 @@ while:
     ld a,l
     or h
     jr nz,while2
+    ld c,(ix+6)                 ; IP = )
+    ld b,(ix+7)
+    ; inc bc                      ; IP = one after )
     jp loopEnd4
-    inc bc                      ; IP = one after )
 while2:
     jp (iy)
 
@@ -1148,8 +1143,7 @@ def:                            ; create a colon definition
     inc bc
     ld de,(vHeapPtr)            ; return start of definition
     push de
-    jp def1
-    
+    jr def1
 def0:    
     ld (vLastDef),A
     call lookup
@@ -1262,35 +1256,26 @@ printDec7:
     ld a,b
     jp putchar
 
-comment:
-    inc bc                      ; point to next char
-    ld a,(bc)
-    cp "\r"                     ; terminate at cr 
-    jr nz,comment
-    dec bc
-    jp   (iy) 
-
-carry:                              ;=10
-    ld hl,0
-    rl l
-    ld (vcarry),hl
-    jp (iy)              
-
 ; (val -- )
 begin:
 loopStart:
     ld (vTemp1),bc              ; save start
     ld e,1                      ; skip to loop end, nesting = 1
-loopStart2:
+loopStart1:
     inc bc
     ld a,(bc)
     call nesting                ; affects zero flag
-    jr nz,loopStart2
+    jr nz,loopStart1
     pop de                      ; de = limit
     ld a,e                      ; is it zero?
     or d
-    jr z,loopStart4             ; yes continue after skip    
-    add a,2                     ; is it TRUE
+    jr nz,loopStart2
+    dec de                      ; de = TRUE
+    ld (vElse),de
+    jr loopStart4               ; yes continue after skip    
+loopStart2:
+    ld a,2                      ; is it TRUE
+    add a,e
     add a,d
     jr nz,loopStart3                
     ld de,1                     ; yes make it 1
@@ -1309,21 +1294,30 @@ loopstart4:
 
 again:
 loopEnd:    
-    ld a,(ix+2)                 ; a = lsb(limit)
-    or (ix+3)                   ; if limit 0 exit loop
+    ld e,(ix+2)                 ; de = limit
+    ld d,(ix+3)
+    ld a,e                      ; a = lsb(limit)
+    or d                        ; if limit 0 exit loop
     jr z,loopEnd4                  
-    inc a                       ; if limit -2
-    inc a                                              
-    add a,(ix+3)
+    inc de                      ; is limit -2
+    inc de
+    ld a,e                      ; a = lsb(limit)
+    or d                        ; if limit 0 exit loop
     jr z,loopEnd2               ; yes, loop again
-    dec (ix+2)                  ; dec limit
-    jr nc,loopEnd2
-    dec (ix+3)
+    dec de
+    dec de
+    dec de
+    ld (ix+2),e                  
+    ld (ix+3),d
 loopEnd2:
-    inc (ix+0)                  ; inc counter
-    jr nc,loopEnd3
-    inc (ix+1)
+    ld e,(ix+0)                 ; inc counter
+    ld d,(ix+1)
+    inc de
+    ld (ix+0),e                  
+    ld (ix+1),d
 loopEnd3:
+    ld de,FALSE                 ; if clause ran then vElse = FALSE    
+    ld (vElse),de
     ld c,(ix+4)                 ; IP = start
     ld b,(ix+5)
     jp (iy)
@@ -1331,6 +1325,21 @@ loopEnd4:
     ld de,2*4                   ; rpop frame
     add ix,de
     jp (iy)
+
+carry:                              
+    ld hl,0
+    rl l
+    ld (vcarry),hl
+    jp (iy)              
+
+comment:
+    inc bc                      ; point to next char
+    ld a,(bc)
+    cp "\r"                     ; terminate at cr 
+    jr nz,comment
+    dec bc
+    jp   (iy) 
+
 
 ; 0 1 count
 ; 2 3 limit

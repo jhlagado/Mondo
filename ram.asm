@@ -1,6 +1,5 @@
         DSIZE       EQU $80
         RSIZE       EQU $80
-        LSIZE       EQU $80
         TIBSIZE     EQU $100		; 256 bytes , along line!
 
         VARS_SIZE      EQU 26*2*2	; A..Z, a..z words
@@ -15,8 +14,6 @@ rStack:
             DS DSIZE
 dStack:        
 stack:
-            DS LSIZE
-lStack:
             .align $100
 opcodes:    
             DS $80-32-1-1
@@ -51,13 +48,13 @@ altVars:
 vByteMode:  DS 2                ; b
 vCarry:     DS 2                ; c
             DS 2                ; d
-vLastDef:   DS 2                ; e
-            DS 2                ; f
+vElse:      DS 2                ; e
+vFalse:     DS 2                ; f
             DS 2                ; g
 vHeapPtr:   DS 2                ; h
             DS 2                ; i
             DS 2                ; j
-            DS 2                ; k
+vTIBPtr:    DS 2                ; k
             DS 2                ; l  
             DS 2                ; m  
             DS 2                ; n
@@ -66,13 +63,13 @@ vPointer:   DS 2                ; p
             DS 2                ; q
 vRemain:    DS 2                ; r     
 vS0:        DS 2                ; s
-vTIBPtr:    DS 2                ; t
-            DS 2                ; u
+vTrue:      DS 2                ; t
+vUnlimited: DS 2                ; u
             DS 2                ; v
             DS 2                ; w
-vHexMode:   DS 2                ; x     
+            DS 2                ; x     
             DS 2                ; y
-            DS 2                ; z
+vLastDef:   DS 2                ; z
 
 VARS:   DS VARS_SIZE
 

@@ -14,15 +14,13 @@
     .org $4000
 
 testsStart:
+    ; CALL enter
+    ; .cstr "`Done!`"
+    ; HALT
 
-    test "9 /F(8)",9
-    test "9 /T(8)",8
-    ; test "/T#(100$)~(200)",100
-    ; test "/F#(100$)~(200)",200
-    CALL printStr
-    .cstr "Done!!\r\n"
-    HALT
-
+    test "/f", FALSE
+    test "/t", TRUE
+    test "/u", UNLIMITED
     test "1", 1
     test "0", 0
     test "10", 10
@@ -72,23 +70,28 @@ testsStart:
     test "[1 2 3]/h$-", 6
     test "/B[1 2 3]/B /h$-", 3
     test "/B[3]/S/B", 1
-    test "0 0($1+$ 1-)", 0
-    test "0 1($1+$ 1-)", 1
-    test "0 5($1+$ 1-)", 5
-
+    test "9 /f(8)",9
+    test "9 /t(8)",8
+    test "/t(100)/e(200)",100
+    test "/f(100)/e(200)",200
+    test "0 0(1+)", 0
+    test "0 1(1+)", 1
+    test "0 5(1+)", 5
+    test "0 1(0(1+))", 0
+    test "0 1(1(1+))", 1
+    test "0 2(1(1+))", 2
+    test "0 2(2(1+))", 4
+    test "0 1(/i+)", 0
+    test "0 0(/i+)", 0
+    test "0 5(/i+)", 10
+    test "0 /u(/i5</W 1+)", 5
+    test "0 /u(1+/i4</W)", 5
 
     CALL enter
     .cstr "`Done!`"
     HALT
     
 
-    ; test "0 1(0(1+))", 0
-    ; test "0 1(1(1+))", 1
-    ; test "0 2(1(1+))", 2
-    ; test "0 2(2(1+))", 4
-    ; test "0 1(/i+)", 0
-    ; test "0 2(/i+)", 1
-    ; test "0 3(/i+)", 3
     ; test "0t! 10(1 t+t!) t",10
     ; test "0t! 2(2(/i /j + t + t! )) t", 4
     ; test "0t! 10(/i 4>/B /i 1 t+t!) t",5

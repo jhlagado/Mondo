@@ -32,9 +32,11 @@ reserve \ for
 conditionals
 ? : ;       ternary
 
+/W used for while
 /B
-/W !!!! used for while
 /H
-/D
 
-
+/f - false
+/t -> /c for char in buffer
+/t -> true
+/u -2 unlimited loops
