@@ -2,23 +2,23 @@
 ;
 ;       Mondo Minimal Interpreter for the z80 
 ;
-;       Ken Boak, John Hardy and craig Jones. 
+;       John Hardy with additional code by Ken Boak and Craig Jones. 
 ;
-;       GNU GENERAL PUBLIc LIcENSE                   Version 3, 29 June 2007
+;       GNU GENERAL PUBLIC LICENSE                   Version 3, 29 June 2007
 ;
-;       see the LIcENSE file in this repo for more information 
+;       see the LICENSE file in this repo for more information 
 ;
 ; *****************************************************************************
     FALSE       EQU 0
     TRUE        EQU -1	
     UNLIMITED   EQU -2		; for endless loops
 
-    cTRL_C      equ 3       ; end of text
-    cTRL_E      equ 5       ; edit
-    cTRL_H      equ 8       ; backspace
-    cTRL_J      equ 10      ; re-edit
-    cTRL_L      equ 12      ; list
-    cTRL_P      equ 16      ; print stack
+    CTRL_C      equ 3       ; end of text
+    CTRL_E      equ 5       ; edit
+    CTRL_H      equ 8       ; backspace
+    CTRL_J      equ 10      ; re-edit
+    CTRL_L      equ 12      ; list
+    CTRL_P      equ 16      ; print stack
 
     BSLASH      equ $5c
 
@@ -161,7 +161,7 @@ interpret:
     ld bc,0                 ; load bc with offset into TIb, decide char into tib or execute or control         
     ld (vTIBPtr),bc
 
-interpret2:                     ; calc nesting (a macro might have changed it)
+interpret2:                 ; calc nesting (a macro might have changed it)
     ld e,0                  ; initilize nesting value
     push bc                 ; save offset into TIb, 
                             ; bc is also the count of chars in TIB
@@ -182,25 +182,25 @@ interpret4:
 
 waitchar:   
     call getchar            ; loop around waiting for character from serial port
-    cp $20			; compare to space
-    jr nc,waitchar1		; if >= space, if below 20 set cary flag
+    cp $20			        ; compare to space
+    jr nc,waitchar1		    ; if >= space, if below 20 set cary flag
     cp $0                   ; is it end of string? null end of string
     jr z,waitchar4
     cp '\r'                 ; carriage return? ascii 13
-    jr z,waitchar3		; if anything else its macro/control 
-    cp cTRL_H
+    jr z,waitchar3		    ; if anything else its macro/control 
+    cp CTRL_H
     jr z,backSpace
     ld d,msb(macros)
-    cp cTRL_E
+    cp CTRL_E
     ld e,lsb(edit_)
     jr z,macro
-    cp cTRL_J
+    cp CTRL_J
     ld e,lsb(reedit_)
     jr z,macro
-    cp cTRL_L
+    cp CTRL_L
     ld e,lsb(list_)
     jr z,macro
-    cp cTRL_P
+    cp CTRL_P
     ld e,lsb(printStack_)
     jr z,macro
     jr interpret2
