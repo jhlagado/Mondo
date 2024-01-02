@@ -14,10 +14,10 @@
 
 testsStart:
 
-    test "1 2 3 /US",0
-    CALL enter
-    .cstr "`Done!`"
-    HALT
+    ; test "",0
+    ; CALL enter
+    ; .cstr "`Done!`"
+    ; HALT
 
     test "/f", FALSE
     test "/t", TRUE

@@ -54,7 +54,7 @@ edit_:
     .cstr "`?`/K/UP/UE;"
 
 printStack_:
-    .cstr "/US/UP;"        
+    .cstr "`=> `/s2-/UD1-(#0@,2-)\\/N/UP;"        
 
 iOpcodes:
     LITDAT 15
@@ -366,7 +366,7 @@ printhex3:
 
 editDef:                        ; lookup up def based on number
     pop hl                      ; pop ret address
-    ex (SP),hl                  ; swap with TOS                  
+    ; ex (SP),hl                  ; swap with TOS                  
     ld a,l
     ex AF,AF'
     ld a,l
@@ -491,13 +491,6 @@ enter:
     pop bc
     dec bc
     jp (iy)                    
-
-loopVar:    
-    ld h,0
-    ld d,ixh
-    ld e,ixl
-    add hl,de
-    jp var1
 
 ; **********************************************************************			 
 ; Page 4 primitive routines 
@@ -1099,12 +1092,6 @@ utility1:
     call prompt
     jp (iy)
 utility2:    
-    cp "S"
-    jr nz,utility3
-; printStk:                           
-    call ENTER
-    .cstr "`=> `/s2-/UD1-(#,2-)\\/N"             
-utility3:
     jp (iy)
 
 while_:
@@ -1314,6 +1301,13 @@ loopEnd4:
     ld de,2*4                   ; rpop frame
     add ix,de
     jp (iy)
+
+loopVar:    
+    ld h,0
+    ld d,ixh
+    ld e,ixl
+    add hl,de
+    jp var1
 
 carry:                              
     ld hl,0
