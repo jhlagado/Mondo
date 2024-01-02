@@ -17,7 +17,6 @@
     CTRL_E      equ 5       ; edit
     CTRL_H      equ 8       ; backspace
     CTRL_J      equ 10      ; re-edit
-    CTRL_L      equ 12      ; list
     CTRL_P      equ 16      ; print stack
 
     BSLASH      equ $5c
@@ -53,9 +52,6 @@ reedit_:
 
 edit_:
     .cstr "`?`/K/UP/UE;"
-
-list_:
-    ; .cstr "/N26(/i65+/UE/k0>(/N))/UP;"
 
 printStack_:
     .cstr "/US/UP;"        
@@ -196,9 +192,6 @@ waitchar:
     jr z,macro
     cp CTRL_J
     ld e,lsb(reedit_)
-    jr z,macro
-    cp CTRL_L
-    ld e,lsb(list_)
     jr z,macro
     cp CTRL_P
     ld e,lsb(printStack_)
@@ -1100,14 +1093,14 @@ utility:
     jp (iy)                 ;   
 utility1:
     cp "E"
-    jp editDef
+    jp z,editDef
     cp "P"
     jr nz,utility2
     call prompt
     jp (iy)
+utility2:    
     cp "S"
     jr nz,utility3
-utility2:    
 ; printStk:                           
     call ENTER
     .cstr "`=> `/s2-/UD1-(#,2-)\\/N"             
