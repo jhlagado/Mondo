@@ -1,42 +1,30 @@
-STACK
-Opcode	Stack	Description
 
-" -> #	(a--a a)	Duplicate TOS (DUP)
-' -> _	(a b--a)	Drop TOS (DROP)
-$	(a b--b a)	Swap top 2 stack items (SWAP)
-%	(a b--a b a)	Push 2nd (OVER)
+strDef_:                         ;= 21
+strDef:                         ;= 21
+    LD DE,(vHeapPtr)        ; HL = heap ptr
+    PUSH DE                 ; save start of string 
+    INC BC                  ; point to next char
+    JR strDef2
+strDef1:
+    LD (DE),A
+    INC DE                  ; increase count
+    INC BC                  ; point to next char
+strDef2:
+    LD A,(BC)
+    CP "`"                  ; ` is the string terminator
+    JR NZ,strDef1
+    XOR A                   ; write null to terminate string
+    LD (DE),A
+    INC DE
+    JP def3
 
-_ -> @ access
+def3:
+    ld (vHeapPtr),de            ; bump heap ptr to after definiton
+    jp (IY)       
 
-!!!!! ~   not
+prnStr_:
+prnStr:
+    POP HL
+    CALL putStr
+    JP (IY)
 
-\ -> /
-/ div
-\\ -> // comment
-\CHAR -> /CHAR command or var
-? -> /K read key
-
-# -> ' hex literal (temporary)
-
-\d -> /b byte mode
-
-booleans 0, 'FFFF
-
-
-( /W ) loops
-
-reserve \ for
-\abc .... ;   lambda ????
-
-
-conditionals
-? : ;       ternary
-
-/W used for while
-/B
-/H
-
-/f - false
-/t -> /c for char in buffer
-/t -> true
-/u -2 unlimited loops

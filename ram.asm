@@ -1,10 +1,10 @@
-        DSIZE       EQU $80
-        RSIZE       EQU $80
-        TIBSIZE     EQU $100		; 256 bytes , along line!
+DSIZE       EQU $80
+RSIZE       EQU $80
+TIBSIZE     EQU $100		; 256 bytes , along line!
 
-        VARS_SIZE      EQU 26*2*2	; A..Z, a..z words
+VARS_SIZE      EQU 26*2*2	; A..Z, a..z words
 
-        .ORG RAMSTART
+.ORG RAMSTART
 
 TIB:        DS TIBSIZE
 
@@ -14,17 +14,6 @@ rStack:
             DS DSIZE
 dStack:        
 stack:
-            .align $100
-opcodes:    
-            DS $80-32-1-1
-altCodes:
-            DS $80-32-1-5
-
-            .align $100
-mintVars:
-            DS $30
-vLoopSP:    DS 2                ; 
-
 tbPtr:      DS 2                ; reserved for tests
 vTemp1:     ds 2                ; 
 vTemp2:     ds 2                ; 
@@ -41,9 +30,14 @@ NMIVEC:     DS 2                ;
 GETCVEC:    DS 2                ;   
 PUTCVEC:    DS 2                ;   
 
-            DS 26*2
-altVars:
+            .align $100
+opcodes:    
+            DS $80-32-1-1
+altCodes:
+            DS 26
 
+            .align $100
+altVars:
             DS 2                ; a
 vByteMode:  DS 2                ; b
 vCarry:     DS 2                ; c
@@ -62,7 +56,7 @@ vTIBPtr:    DS 2                ; k
 vPointer:   DS 2                ; p
             DS 2                ; q
 vRemain:    DS 2                ; r     
-vS0:        DS 2                ; s
+vStkStart:  DS 2                ; s
 vTrue:      DS 2                ; t
 vUnlimited: DS 2                ; u
             DS 2                ; v
@@ -71,6 +65,6 @@ vUnlimited: DS 2                ; u
             DS 2                ; y
 vLastDef:   DS 2                ; z
 
-VARS:   DS VARS_SIZE
+VARS:       DS VARS_SIZE
 
 HEAP:         
